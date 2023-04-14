@@ -10,7 +10,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/iml-gddaiss/marel_marine_scale_controller",
     packages=find_packages(),
-    package_data={"": ["*.json", "*.lua"]},
+    package_data={"": ["config/*.json", "static/*.lua", "static/*.ico"]},
     include_package_data=True,
     classifiers=["Programming Language :: Python :: 3"],
     python_requires="~=3.10",
