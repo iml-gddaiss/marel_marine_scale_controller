@@ -1,7 +1,7 @@
 print('Starting Lua Script')
 
 function send_weight(port, prefix)
-  --[It could check if the port is connect (maybe) before writing to it.]
+  --[It could check if the comm_port is connect (maybe) before writing to it.]
   --[Check units.]
   weight, stability, zero, net = GetWeight()
   --weight = ScaleTrim(weight)
@@ -16,7 +16,7 @@ end
 
 
 function keep_port_alive(port)
-  --[It could check if the port is connect (maybe) before writing to it.]
+  --[It could check if the comm_port is connect (maybe) before writing to it.]
   CommStr(port, '%#\n') -- Keep alive
   print('') -- Keep alive
 end
@@ -96,7 +96,8 @@ function run_prog_1(port, screen)
         break
       end
     else
-      keep_port_alive(port)
+      send_weight(port, 'w')
+      --keep_port_alive(comm_port)
     end
   end
   print("Exiting program 1")

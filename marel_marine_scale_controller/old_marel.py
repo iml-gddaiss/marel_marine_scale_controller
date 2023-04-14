@@ -13,7 +13,7 @@ How to communicate with the scale ?
     Available Ports:
         52200: For dot commands according the Marel documentations. (to access model )
         52202: To send a Lua Script (as a string) and overwrite the one on the scale.
-        52203: Once connected to the port, the scale will send the Lua script in memory.
+        52203: Once connected to the comm_port, the scale will send the Lua script in memory.
         52210: Marel Lua Interpreter Standard Output, for example using Lua print()
         52211: Usable output using the Marel Lua function CommStr(4, <str>). Persistent queue.
         52212: Usable output using the Marel Lua function CommStr(5, <str>).  (?).
@@ -109,7 +109,7 @@ class EthernetClient:
         self.port = port
         timeout = timeout or self.default_timeout
 
-        logging.debug(f'MAREL: Attempting to connect to ip: {ip_address} on port {port}. Timeout: {timeout} seconds')
+        logging.debug(f'MAREL: Attempting to connect to ip: {ip_address} on comm_port {port}. Timeout: {timeout} seconds')
 
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
@@ -117,7 +117,7 @@ class EthernetClient:
             self.socket.connect((ip_address, port))
             self._is_connected = True
             self.socket.settimeout(self.default_timeout)
-            logging.debug(f'MAREL: Connected on port {port}')
+            logging.debug(f'MAREL: Connected on comm_port {port}')
         except TimeoutError:
             logging.error(f'Failed to connect: Timeout. Device not found.')
         except OSError as err:
@@ -264,7 +264,6 @@ class TestMarel:
             weight = self.controller.weight
             self.controller.weight = ""
             print(f'Weight: {weight}')
-
 
 
 def update_lua_code(filename: str, ip_address: str):
