@@ -7,6 +7,7 @@ from typing import *
 
 import pyautogui as pag
 
+from marel_marine_scale_controller import COMM_PORT, DOWNLOAD_PORT, UPLOAD_PORT
 from marel_marine_scale_controller.client import MarelClient
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,11 +19,6 @@ UNITS_CONVERSION = {
 
 def convert_units(a, b):
     return UNITS_CONVERSION[a] / UNITS_CONVERSION[b]
-
-
-COMM_PORT = 52212
-DOWNLOAD_PORT = 52202
-UPLOAD_PORT = 52203
 
 
 class Controller:
@@ -151,8 +147,3 @@ class Controller:
 
         logging.info('Failed to upload Lua Script.')
         return 0  # File downloaded but did not match the uploaded one.
-
-
-if __name__ == "__main__":
-    HOST = "localhost"
-    PORT = 52210

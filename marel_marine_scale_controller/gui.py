@@ -1,12 +1,21 @@
 import time
+import json
+import threading
 
-from marel_marine_scale_controller.marel_controller import Controller, COMM_PORT
+from marel_marine_scale_controller import LUA_SCRIPT_PATH, CONFIG_PATH, LOGO_PATH
+from marel_marine_scale_controller.marel_controller import Controller
 
 import tkinter as tk
 
-import threading
 
-LUA_SCRIPT = "marel_app.lua"
+def load_config():
+    with open(CONFIG_PATH, 'r') as f:
+        return json.load(f)
+
+
+def save_config(config):
+    with open(CONFIG_PATH, 'w') as f:
+        json.dump(config, f)
 
 
 def iter_row(r):
@@ -16,15 +25,24 @@ def iter_row(r):
 
 
 class GUI:
-    def __init__(self, host: str):
+    def __init__(self, host: str = None):
         self.listening_thread = None
         self.controller = None
 
-        self.init_layout(host)
+        if host:
+            self.host = host
+        else:
+            config = load_config()
+            self.host = config['host']
 
-    def init_layout(self, host):
+        self.init_layout()
+
+    def init_layout(self):
         self.root = tk.Tk()
-        self.root.title("Marel Controller")
+
+        self.root.iconphoto(True, tk.PhotoImage(LOGO_PATH))
+
+        self.root.title("Marel Marine Scale")
         #self.root.geometry('200x200')  # set the size of the window
         self.root.minsize(230, 180)  # Set the minimum width of the window
         self.root.maxsize(230, 180)
@@ -36,7 +54,7 @@ class GUI:
         host_label = tk.Label(self.root, text="Host:", justify='left')
         host_label.grid(row=r, column=0, sticky='ew', padx=5)
         self.host_entry = tk.Entry(self.root, justify='right', width=15)
-        self.host_entry.insert(tk.END, host)
+        self.host_entry.insert(tk.END, self.host)
         self.host_entry.grid(row=0, column=1, pady=5, padx=5, stick='ew')
 
         # UPDATE
@@ -83,9 +101,12 @@ class GUI:
     def start_listening(self):
         self.start_button.config(state='disable')
         if not self.controller:
-            host = self.host_entry.get()
+            self.host = self.host_entry.get()
+
+            save_config({'host': self.host})
+
             # port = int(self.port_entry.get())
-            self.controller = Controller(host)
+            self.controller = Controller(self.host)
 
         self.listening_thread = threading.Thread(target=self.controller.start_listening)
         self.listening_thread.start()
@@ -109,7 +130,7 @@ class GUI:
             host = self.host_entry.get()
             self.controller = Controller(host)
 
-        flag = self.controller.update_lua_code(LUA_SCRIPT)
+        flag = self.controller.update_lua_code(LUA_SCRIPT_PATH)
 
         match flag:
             case -1:
@@ -192,8 +213,6 @@ class GUI:
         self.root.destroy()
 
 
-if __name__ == "__main__":
-    gui = GUI("localhost")
-    #gui = GUI("192.168.0.202")
+def main():
+    gui = GUI()
     gui.run()
-

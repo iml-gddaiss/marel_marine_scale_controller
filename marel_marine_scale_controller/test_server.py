@@ -52,10 +52,10 @@ class TestServer:
             try:
                 conn, addr = self._upload_socket.accept()
                 logging.info(f"Test upload Server accepted connection from {addr}")
-                time.sleep(2)
-                print(conn.sendall(lua_script.encode()))
+                #time.sleep(2)
+                conn.sendall(lua_script.encode())
                 logging.info("send all done")
-                time.sleep(2)
+                #time.sleep(1)
                 conn.close()
 
             except Exception as e:
