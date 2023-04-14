@@ -216,3 +216,6 @@ class GUI:
 def main():
     gui = GUI()
     gui.run()
+
+
+main()
