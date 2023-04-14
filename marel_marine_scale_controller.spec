@@ -27,7 +27,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Marel Marine Scale',
+    name='MarelMarineScale',
     debug=False,
     icon='./marel_marine_scale_controller/static/logo.ico',
     bootloader_ignore_signals=False,
@@ -48,5 +48,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='Marel Marine Scale',
+    name='MarelMarineScale',
 )
