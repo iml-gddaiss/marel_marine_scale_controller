@@ -2,7 +2,7 @@ import os, sys
 
 VERSION = "1.0.0"
 
-PROGRAM_DIRECTORY = sys.path[0]
+PROGRAM_DIRECTORY = os.path.dirname(__file__)
 
 LUA_SCRIPT_PATH = os.path.join(PROGRAM_DIRECTORY, "static/marel_app.lua")
 CONFIG_PATH = os.path.join(PROGRAM_DIRECTORY, "config/gui_config.json")

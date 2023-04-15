@@ -4,12 +4,12 @@ import random
 import time
 import logging
 
+from marel_marine_scale_controller import LUA_SCRIPT_PATH
+
 DOWNLOAD_PORT = 52202
 UPLOAD_PORT = 52203
 
 logging.basicConfig(level=logging.DEBUG)
-
-LUA_SCRIPT = "marel_app.lua"
 
 class TestServer:
     def __init__(self, host, port):
@@ -45,7 +45,7 @@ class TestServer:
 
     def upload_run(self):
         logging.info(f"Test upload server on port {UPLOAD_PORT}")
-        with open(LUA_SCRIPT, 'r') as lua_app:
+        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
             lua_script = lua_app.read() + '\n'
 
         while self.upload_running:
@@ -64,7 +64,7 @@ class TestServer:
 
     def download_run(self):
         logging.info(f"Test download server on port {DOWNLOAD_PORT}")
-        with open(LUA_SCRIPT, 'r') as lua_app:
+        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
             lua_script = lua_app.read()
 
         while self.download_running:
