@@ -11,6 +11,7 @@ UPLOAD_PORT = 52203
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 class TestServer:
     def __init__(self, host, port):
         self.host = host
@@ -138,7 +139,7 @@ class TestServer:
                 message = self.generate_message()
                 conn.sendall(message.encode())
                 logging.debug(f"sent: {message}")
-                time.sleep(1)
+                time.sleep(.5)
         except Exception as e:
             logging.debug(f"Error handling connection: {e}")
         finally:
@@ -164,7 +165,7 @@ class TestServer:
     @staticmethod
     def generate_message():
         sensor_id = random.choice(['w'])
-        value = random.uniform(0, 100)
+        value = random.uniform(0, 10000)/1e3
         unit = 'kg'
         message = f"%{sensor_id},{value:.2f}{unit}#\n"
         return message

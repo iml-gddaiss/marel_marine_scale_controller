@@ -1,18 +1,19 @@
-import logging
-from pathlib import Path
-import time
+
+import os
 import json
 import threading
+import time
+import tkinter as tk
+from pathlib import Path
 
 from marel_marine_scale_controller import LUA_SCRIPT_PATH, CONFIG_PATH
 from marel_marine_scale_controller.marel_controller import Controller
-
-import tkinter as tk
 
 PROGRAM_DIRECTORY = Path(__file__).parent
 
 ABS_LUA_SCRIPT_PATH = str(PROGRAM_DIRECTORY.joinpath(LUA_SCRIPT_PATH))
 ABS_CONFIG_PATH = str(PROGRAM_DIRECTORY.joinpath(CONFIG_PATH))
+ABS_LOGO_PATH = str(PROGRAM_DIRECTORY.joinpath("static/logo.ico"))
 
 
 def load_config():
@@ -47,18 +48,19 @@ class GUI:
     def init_layout(self):
         self.root = tk.Tk()
 
-
         self.root.title("Marel Marine Scale")
-        #self.root.geometry('200x200')  # set the size of the window
-        self.root.minsize(230, 180)  # Set the minimum width of the window
-        self.root.maxsize(230, 210)
+
+        if "nt" == os.name:
+            self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
+
+        self.root.minsize(int(230*1.1), int(210*1.1))
 
         row = iter_row(0)
 
         # HOST INPUT
         r=next(row)
-        host_label = tk.Label(self.root, text="Host:", justify='right')
-        host_label.grid(row=r, column=0, columnspan=3, sticky='ew', padx=5)
+        host_label = tk.Label(self.root, text="Host:", justify='right', width=4)
+        host_label.grid(row=r, column=1, columnspan=2, sticky='ew', padx=5)
         self.host_entry = tk.Entry(self.root, justify='right', width=15)
         self.host_entry.insert(tk.END, self.host)
         self.host_entry.grid(row=0, column=3, columnspan=4, pady=5, padx=5, stick='ew')
@@ -70,51 +72,63 @@ class GUI:
         update_status_label.grid(row=r, column=0, columnspan=3, pady=5, padx=5, sticky='ew')
 
         # Update Lua App Button
-        self.update_lua_button = tk.Button(self.root, text="Update Lua App", width=12, command=self.update_lua_app)
+        self.update_lua_button = tk.Button(self.root, text="Update Lua App", width=12, command=self.update_lua_app, bg='#AAC8C1')
         self.update_lua_button.grid(row=r, column=3, columnspan=4, pady=5, padx=5, stick='ew')
 
         # LED indicator
         r = next(row)
-        status_label = tk.Label(self.root, text='Status: ')
-        status_label.grid(row=r, column=0, columnspan=2, pady=5, sticky='e')
+        status_label = tk.Label(self.root, text='Status: ', width=6)
+        status_label.grid(row=r, column=1, columnspan=2, pady=5, sticky='e')
         self.led_canvas = tk.Canvas(self.root, width=20, height=20)
-        self.led_canvas.grid(row=r, column=2, columnspan=1, pady=5, sticky='e')
+        self.led_canvas.grid(row=r, column=3, columnspan=1, pady=5, sticky='w')
         self.led = self.led_canvas.create_oval(5, 5, 15, 15, fill="red")
 
         # Start | Stop Button
-        self.start_button = tk.Button(self.root, text="Start", command=self.start_listening)
+        self.start_button = tk.Button(self.root, text="Start", command=self.start_listening, width=4, bg='#AAC893')
         self.start_button.grid(row=r, column=2, columnspan=3, pady=5, padx=5,  sticky='e')
 
-        self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_listening, state='disable')
+        self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_listening, state='disable', width=4, bg='#E2C8C8')
         self.stop_button.grid(row=r, column=5, columnspan=3, pady=5, padx=5, sticky='e')
-
 
         # Weight display
         r = next(row)
-        weight_label = tk.Label(self.root, text="Weight: ", font=10)
-        weight_label.grid(row=r, column=0, columnspan=3, sticky='w', padx=5)
+
         self.weight_value = tk.StringVar(value="-"*7)
-        weight_value_label = tk.Label(self.root, textvariable=self.weight_value, width=10,
-                                      font=16, height=2, border=1, relief='sunken', anchor='e')
-        weight_value_label.grid(row=r, column=2, columnspan=4,  padx=5, pady=5, sticky='e', )
+        weight_value_label = tk.Label(self.root, textvariable=self.weight_value, width=15,
+                                      font=('jetbrains mono', 18, 'bold'), height=2, border=1,
+                                      relief='sunken',
+                                      anchor='e',
+                                      bg="#F7B7C2", fg="#FFFFFF", bd=5)
+
+        weight_value_label.grid(row=r, column=1, columnspan=5, padx=5, pady=5, sticky='w', )
 
         # Unit selection
-        #r = next(row)
+
         default_unit = tk.StringVar(self.root, value='kg')
         units_option = ('kg', 'g')
         self.units = tk.OptionMenu(self.root, default_unit, *units_option, command=self.set_units)
-        self.units.config(indicatoron=False)
+        self.units.config(indicatoron=False, width=4, bg='#C0C0C0')
         self.units.grid(row=r, column=6, columnspan=2, pady=1, padx=1,  sticky='e')
 
-        self.root.grid_columnconfigure(0, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(1, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(2, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(3, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(4, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(5, weight=1, uniform="fred")
-        self.root.grid_columnconfigure(6, weight=1, uniform="fred")
+        # auto-enter
+        self.auto_enter_var = tk.BooleanVar()
+
+        r = next(row)
+        self.auto_enter_button = tk.Button(self.root, text='auto-enter', command=self.auto_enter, width=10, bg='#AAC8C1')
+        self.auto_enter_button.grid(row=r, column=2, columnspan=4, pady=1, padx=1,  sticky='e')
+
+
+        self.root.grid_columnconfigure(0, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(1, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(2, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(3, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(4, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(5, weight=1)#, uniform="fred")
+        self.root.grid_columnconfigure(6, weight=1)#, uniform="fred")
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        self.root.grid_propagate(False)
 
         self.refresh_display()
 
@@ -128,6 +142,8 @@ class GUI:
 
         if not self.controller:
             self.controller = Controller(self.host)
+            if self.controller.auto_enter is True:
+                self.auto_enter_button.config(relief='sunken')
 
         else:
             self.controller.host = self.host
@@ -146,6 +162,18 @@ class GUI:
     def set_units(self, unit):
         if self.controller:
             self.controller.set_units(unit)
+            time.sleep(.1)
+
+    def auto_enter(self):
+        if self.controller:
+            if self.controller.auto_enter is True:
+                self.controller.auto_enter = False
+                self.auto_enter_button.config(relief='raised')
+            else:
+                self.controller.auto_enter = True
+                self.auto_enter_button.config(relief='sunken')
+
+            print(self.controller.auto_enter)
 
     def update_lua_app(self):
         threading.Thread(target=self.run_update_lua, daemon=True).start()
@@ -191,11 +219,6 @@ class GUI:
 
     def refresh_buttons(self):
         if self.controller:
-            # values = self.controller.get_latest_values()
-            # self.value_text.delete(1.0, tk.END)
-            # for name, value in values.items():
-            #     self.value_text.insert(tk.END, f"{name}: {value}\n")
-
             if self.controller.is_connecting:
                 self.disable_input()
                 self.start_button.config(state='disable')
@@ -213,11 +236,11 @@ class GUI:
             self.enable_input()
             self.start_button.config(state='normal')
             self.stop_button.config(state='disable')
-            #self.update_lua_button.config(state='disable')
 
     def refresh_weight(self):
         if self.controller:
             self.units.config(state='normal')
+            self.auto_enter_button.config(state='normal')
 
             if self.controller.is_listening:
                 weight = self.controller.get_weight()
@@ -225,12 +248,13 @@ class GUI:
                     if self.controller.units == 'kg':
                         self.weight_value.set(f"{weight:.04f} {self.controller.units} ")
                     else:
-                        self.weight_value.set(f"{weight:.00f} {self.controller.units} ")
+                        self.weight_value.set(f"{weight:.01f} {self.controller.units} ")
             else:
                 self.weight_value.set("-  ")
         else:
             self.weight_value.set("-  ")
             self.units.config(state='disable')
+            self.auto_enter_button.config(state='disable')
 
     def refresh_display(self):
         self.refresh_buttons()

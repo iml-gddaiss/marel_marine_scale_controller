@@ -31,6 +31,7 @@ class Controller:
         self.is_listening = False
         self.is_connecting = False
         self.client: MarelClient = MarelClient()
+        self.auto_enter = True
 
     def start_listening(self):
         self.connect_client()
@@ -85,20 +86,16 @@ class Controller:
             if prefix == 'k':
                 self.to_keyboard(value)
 
-    @staticmethod
-    def to_keyboard(value: Union[float, int, str, bool], auto_enter=True):
+    def to_keyboard(self, value: Union[float, int, str, bool]):
         """Print the `value` (as a string) where the cursor is.
 
         Parameters
         ----------
         value :
             Value to print.66.01
-
-        auto_enter :
-            If True, the `enter` key is pressed.
         """
         pag.write(str(value))
-        if auto_enter is True:
+        if self.auto_enter is True:
             pag.press('enter')
 
     def set_units(self, units: str):
