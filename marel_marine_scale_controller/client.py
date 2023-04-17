@@ -15,7 +15,7 @@ class MarelClient:
         self.reconnect_delay = 2
         self.data = None
 
-    def connect(self, host, port, single_try=True):
+    def connect(self, host, port, single_try=True, timeout=1):
         self.data = b''
         self.host = host
         self.port = port
@@ -25,7 +25,7 @@ class MarelClient:
             logging.info(f'Trying to connect ... {host}:{port}')
             try:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket.settimeout(5)
+                self.socket.settimeout(timeout)
                 self.socket.connect((self.host, self.port))
                 logging.info("Client Socket Connected")
                 self.is_connected = True
@@ -55,8 +55,19 @@ class MarelClient:
             self.close()
             return None
 
-    def receive(self, allow_timeout=True):
-        """Will try to reconnect if an OSError is raise on receive."""
+    def receive(self, allow_timeout=True, split=True) -> list:
+        """Will try to reconnect if an OSError is raise on receive.
+
+        Parameters
+        ----------
+        allow_timeout :
+            If True, socket will stay connected on timeout.
+
+        split :
+            If True, messages are split on newline and the last value is
+            put back in the received buffer.
+
+        """
         while True:
             try:
                 received = self.socket.recv(4096)
@@ -80,10 +91,16 @@ class MarelClient:
                 return []
 
             self.data += received
-            messages = self.data.split(b'\n')  # this is done to prevent splitting of msg ---+
-            if len(messages) > 1:              #     (could cause problem with downloading)  |
-                self.data = messages.pop()     # <--------------- They are put back here <---+
-                return [message.decode(MAREL_MSG_ENCODING) for message in messages]
+
+            if split is True:
+                messages = self.data.split(b'\n')
+                if len(messages) > 1:
+                    self.data = messages.pop()
+                    return [message.decode(MAREL_MSG_ENCODING) for message in messages]
+            else:
+                message = [self.data.decode(MAREL_MSG_ENCODING)]
+                self.data = b''
+                return message
 
     def disconnect(self):
         """Force disconnection of the socket e.i Use Shutdown"""

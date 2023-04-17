@@ -44,7 +44,7 @@ class Controller:
 
     def connect_client(self):
         self.is_connecting = True
-        self.client.connect(self.host, self.comm_port)
+        self.client.connect(self.host, self.comm_port, timeout=1)
         self.is_connecting = False
 
     def stop_listening(self):
@@ -131,14 +131,16 @@ class Controller:
 
         if upload_client.is_connected:
             while True:
-                received += upload_client.receive(allow_timeout=True)
+                received += upload_client.receive(allow_timeout=True, split=False)
 
-                if count > 5:
+                if count > 10:
                     break
                 count += 1
 
             upload_client.close()
-            received_lua_script = '\n'.join(received)
+
+            received_lua_script = ''.join(received)
+
             logging.info('Lua Script uploaded from scale.')
 
             if received_lua_script == sent_lua_script:
