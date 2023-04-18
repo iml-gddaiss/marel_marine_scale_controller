@@ -49,7 +49,7 @@ class GUI:
 
         if platform.system() == "Windows":
             self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
-            XX, YY = 260, 310
+            XX, YY = 280, 290
         else:
             XX, YY = 230, 210
 
@@ -69,7 +69,7 @@ class GUI:
         ##### Row 1 UPDATE STATUS | UPDATE BUTTON
         row1 = tk.Frame(self.root)
         self.update_status = tk.StringVar(value="----")
-        update_status_label = tk.Label(row1, textvariable=self.update_status, relief='sunken', width=9)
+        update_status_label = tk.Label(row1, textvariable=self.update_status, relief='sunken', width=10)
         self.update_lua_button = tk.Button(row1, text="Update Lua App", command=self.update_lua_app, bg='#AAC8C1')
 
         update_status_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
@@ -83,8 +83,9 @@ class GUI:
         self.led_canvas = tk.Canvas(row2, height=20, width=20)
         self.led = self.led_canvas.create_oval(5, 5, 16, 16, fill="red")
 
-        self.start_button = tk.Button(row2, text="Start", command=self.start_listening, bg='#AAC893', width=5)
-        self.stop_button = tk.Button(row2, text="Stop", command=self.stop_listening, state='disable', bg='#E2C8C8', width=5)
+        w = 7 if platform.system() == 'Windows' else 5
+        self.start_button = tk.Button(row2, text="Start", command=self.start_listening, bg='#AAC893', width=w)
+        self.stop_button = tk.Button(row2, text="Stop", command=self.stop_listening, state='disable', bg='#E2C8C8', width=w)
 
         status_label.grid(row=0, column=0, columnspan=1, sticky='ew')
         self.led_canvas.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
@@ -103,7 +104,7 @@ class GUI:
         row4 = tk.Frame(self.root)
         self.auto_enter_var = tk.BooleanVar()
         auto_enter_label = tk.Label(row4, text=' auto-enter:')
-        self.auto_enter_button = tk.Button(row4, text='ON ', command=self.auto_enter, bg='#AAC8C1', height=1, width=2)
+        self.auto_enter_button = tk.Button(row4, text='ON', command=self.auto_enter, bg='#AAC8C1', height=1, width=3)
 
         units_label = tk.Label(row4, text=' units:')
         default_unit = tk.StringVar(row4, value='kg')
@@ -117,7 +118,7 @@ class GUI:
         units_label.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
         self.units.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
 
-        row0.pack(pady=pady, padx=padx, fill='both')
+        row0.pack(pady=pady, padx=padx, fill='both', expand=True)
         row1.pack(pady=pady, padx=padx, fill='both')
         row2.pack(pady=pady, padx=padx, fill='both')
         row3.pack(pady=pady, padx=padx, fill='both')
@@ -166,7 +167,7 @@ class GUI:
                 self.auto_enter_button.config(relief='raised', text='OFF')
             else:
                 self.controller.auto_enter = True
-                self.auto_enter_button.config(relief='sunken', text='ON ')
+                self.auto_enter_button.config(relief='sunken', text='ON')
 
     def update_lua_app(self):
         threading.Thread(target=self.run_update_lua, daemon=True).start()
