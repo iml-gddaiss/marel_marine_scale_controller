@@ -47,7 +47,7 @@ class TestServer:
     def upload_run(self):
         logging.info(f"Test upload server on port {UPLOAD_PORT}")
         with open(LUA_SCRIPT_PATH, 'r') as lua_app:
-            lua_script = lua_app.read() + '\n'
+            lua_script = lua_app.read()
 
         while self.upload_running:
             try:

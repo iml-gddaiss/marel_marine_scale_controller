@@ -26,12 +26,6 @@ def save_config(config):
         json.dump(config, f)
 
 
-def iter_row(r):
-    while 1:
-        yield r
-        r += 1
-
-
 class GUI:
     def __init__(self, host: str = None):
         self.listening_thread = None
@@ -46,90 +40,90 @@ class GUI:
         self.init_layout()
 
     def init_layout(self):
+        pady = 2
+        padx = 2
+
         self.root = tk.Tk()
 
-        self.root.title("Marel Marine Scale")
+        self.root.title("Marel App")
 
-        if platform.system() == "WIN":
+        if platform.system() == "Windows":
             self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
-            self.root.minsize(int(260), int(260))
+            XX, YY = 260, 310
         else:
-            self.root.minsize(int(230), int(230))
+            XX, YY = 230, 210
 
-        row = iter_row(0)
+        self.root.minsize(XX, YY)
+        self.root.maxsize(XX, YY)
 
-        # HOST INPUT
-        r=next(row)
-        host_label = tk.Label(self.root, text="Host:", justify='right', width=4)
-        host_label.grid(row=r, column=1, columnspan=2, sticky='ew', padx=5)
-        self.host_entry = tk.Entry(self.root, justify='right', width=15)
+        ##### Row 0  HOST | INPUT
+        row0 = tk.Frame(self.root)
+
+        host_label = tk.Label(row0, text="Host:", width=5)
+        self.host_entry = tk.Entry(row0, justify='right')
         self.host_entry.insert(tk.END, self.host)
-        self.host_entry.grid(row=0, column=3, columnspan=4, pady=5, padx=5, stick='ew')
 
-        # UPDATE
-        r = next(row)
+        host_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
+        self.host_entry.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
+
+        ##### Row 1 UPDATE STATUS | UPDATE BUTTON
+        row1 = tk.Frame(self.root)
         self.update_status = tk.StringVar(value="----")
-        update_status_label = tk.Label(self.root, textvariable=self.update_status, width=10, relief='sunken')
-        update_status_label.grid(row=r, column=0, columnspan=3, pady=5, padx=5, sticky='ew')
+        update_status_label = tk.Label(row1, textvariable=self.update_status, relief='sunken', width=9)
+        self.update_lua_button = tk.Button(row1, text="Update Lua App", command=self.update_lua_app, bg='#AAC8C1')
 
-        # Update Lua App Button
-        self.update_lua_button = tk.Button(self.root, text="Update Lua App", width=12, command=self.update_lua_app, bg='#AAC8C1')
-        self.update_lua_button.grid(row=r, column=3, columnspan=4, pady=5, padx=5, stick='ew')
+        update_status_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
+        self.update_lua_button.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
+
+        ##### Row 2  Statys | Led | Start | Stop Button
+        row2 = tk.Frame(self.root)
 
         # LED indicator
-        r = next(row)
-        status_label = tk.Label(self.root, text='Status: ', width=6)
-        status_label.grid(row=r, column=1, columnspan=2, pady=5, sticky='e')
-        self.led_canvas = tk.Canvas(self.root, width=20, height=20)
-        self.led_canvas.grid(row=r, column=3, columnspan=1, pady=5, sticky='w')
-        self.led = self.led_canvas.create_oval(5, 5, 15, 15, fill="red")
+        status_label = tk.Label(row2, text='Status:',)
+        self.led_canvas = tk.Canvas(row2, height=20, width=20)
+        self.led = self.led_canvas.create_oval(5, 5, 16, 16, fill="red")
 
-        # Start | Stop Button
-        self.start_button = tk.Button(self.root, text="Start", command=self.start_listening, width=4, bg='#AAC893')
-        self.start_button.grid(row=r, column=2, columnspan=3, pady=5, padx=5,  sticky='e')
+        self.start_button = tk.Button(row2, text="Start", command=self.start_listening, bg='#AAC893', width=5)
+        self.stop_button = tk.Button(row2, text="Stop", command=self.stop_listening, state='disable', bg='#E2C8C8', width=5)
 
-        self.stop_button = tk.Button(self.root, text="Stop", command=self.stop_listening, state='disable', width=4, bg='#E2C8C8')
-        self.stop_button.grid(row=r, column=5, columnspan=3, pady=5, padx=5, sticky='e')
+        status_label.grid(row=0, column=0, columnspan=1, sticky='ew')
+        self.led_canvas.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
+        self.start_button.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
+        self.stop_button.grid(row=0, column=4, columnspan=1, sticky='ew', padx=2)
 
+        ##### Row 3 Weight
+        row3 = tk.Frame(self.root)
         # Weight display
-        r = next(row)
-
         self.weight_value = tk.StringVar(value="-"*7)
-        weight_value_label = tk.Label(self.root, textvariable=self.weight_value, width=15,
-                                      font=('jetbrains mono', 18, 'bold'), height=2, border=1,
-                                      relief='sunken',
-                                      anchor='e',
-                                      bg="#F7B7C2", fg="#FFFFFF", bd=5)
+        weight_value_label = tk.Label(row3, textvariable=self.weight_value,  height=2, border=1, relief='sunken',
+                                      anchor='e', bg="#F7B7C2", fg="#FFFFFF", bd=5, font=('jetbrains mono', 18, 'bold'), width=12)
+        weight_value_label.grid(row=0, column=0, columnspan=1, sticky='ew',  padx=2)
 
-        weight_value_label.grid(row=r, column=1, columnspan=5, padx=5, pady=5, sticky='w', )
-
-        # Unit selection
-
-        default_unit = tk.StringVar(self.root, value='kg')
-        units_option = ('kg', 'g')
-        self.units = tk.OptionMenu(self.root, default_unit, *units_option, command=self.set_units)
-        self.units.config(indicatoron=False, width=4, bg='#C0C0C0')
-        self.units.grid(row=r, column=6, columnspan=2, pady=1, padx=1,  sticky='e')
-
-        # auto-enter
+        ##### Row 4 Auto-Enter | Units
+        row4 = tk.Frame(self.root)
         self.auto_enter_var = tk.BooleanVar()
+        auto_enter_label = tk.Label(row4, text=' auto-enter:')
+        self.auto_enter_button = tk.Button(row4, text='ON ', command=self.auto_enter, bg='#AAC8C1', height=1, width=2)
 
-        r = next(row)
-        self.auto_enter_button = tk.Button(self.root, text='auto-enter  ON ', command=self.auto_enter, width=12, bg='#AAC8C1', height=1, border=1, bd=2)
-        self.auto_enter_button.grid(row=r, column=2, columnspan=4, pady=1, padx=1,  sticky='e')
+        units_label = tk.Label(row4, text=' units:')
+        default_unit = tk.StringVar(row4, value='kg')
+        units_option = ('kg', 'g')
+        self.units = tk.OptionMenu(row4, default_unit, *units_option, command=self.set_units)
+        self.units.config(indicatoron=False, bg='#C0C0C0', width=2)
 
+        #tk.Label(row4, width=7).grid(row=0, column=0)
+        auto_enter_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
+        self.auto_enter_button.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
+        units_label.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
+        self.units.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
 
-        self.root.grid_columnconfigure(0, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(1, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(2, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(3, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(4, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(5, weight=1)#, uniform="fred")
-        self.root.grid_columnconfigure(6, weight=1)#, uniform="fred")
+        row0.pack(pady=pady, padx=padx, fill='both')
+        row1.pack(pady=pady, padx=padx, fill='both')
+        row2.pack(pady=pady, padx=padx, fill='both')
+        row3.pack(pady=pady, padx=padx, fill='both')
+        row4.pack(pady=pady, padx=padx, fill='both')
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        self.root.grid_propagate(False)
 
         self.refresh_display()
 
@@ -169,12 +163,10 @@ class GUI:
         if self.controller:
             if self.controller.auto_enter is True:
                 self.controller.auto_enter = False
-                self.auto_enter_button.config(relief='raised', text='auto-enter OFF ')
+                self.auto_enter_button.config(relief='raised', text='OFF')
             else:
                 self.controller.auto_enter = True
-                self.auto_enter_button.config(relief='sunken', text='auto-enter  ON ')
-
-            print(self.controller.auto_enter)
+                self.auto_enter_button.config(relief='sunken', text='ON ')
 
     def update_lua_app(self):
         threading.Thread(target=self.run_update_lua, daemon=True).start()
