@@ -1,5 +1,5 @@
-
 import os
+import platform
 import json
 import threading
 import time
@@ -50,10 +50,11 @@ class GUI:
 
         self.root.title("Marel Marine Scale")
 
-        if "nt" == os.name:
+        if platform.system() == "WIN":
             self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
-
-        self.root.minsize(int(230*1.1), int(210*1.1))
+            self.root.minsize(int(260), int(260))
+        else:
+            self.root.minsize(int(230), int(230))
 
         row = iter_row(0)
 
@@ -114,7 +115,7 @@ class GUI:
         self.auto_enter_var = tk.BooleanVar()
 
         r = next(row)
-        self.auto_enter_button = tk.Button(self.root, text='auto-enter', command=self.auto_enter, width=10, bg='#AAC8C1')
+        self.auto_enter_button = tk.Button(self.root, text='auto-enter  ON ', command=self.auto_enter, width=12, bg='#AAC8C1', height=1, border=1, bd=2)
         self.auto_enter_button.grid(row=r, column=2, columnspan=4, pady=1, padx=1,  sticky='e')
 
 
@@ -168,10 +169,10 @@ class GUI:
         if self.controller:
             if self.controller.auto_enter is True:
                 self.controller.auto_enter = False
-                self.auto_enter_button.config(relief='raised')
+                self.auto_enter_button.config(relief='raised', text='auto-enter OFF ')
             else:
                 self.controller.auto_enter = True
-                self.auto_enter_button.config(relief='sunken')
+                self.auto_enter_button.config(relief='sunken', text='auto-enter  ON ')
 
             print(self.controller.auto_enter)
 
