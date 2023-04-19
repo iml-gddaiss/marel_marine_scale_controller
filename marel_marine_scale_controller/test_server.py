@@ -4,12 +4,13 @@ import random
 import time
 import logging
 
+from marel_marine_scale_controller import LUA_SCRIPT_PATH
+
 DOWNLOAD_PORT = 52202
 UPLOAD_PORT = 52203
 
 logging.basicConfig(level=logging.DEBUG)
 
-LUA_SCRIPT = "marel_app.lua"
 
 class TestServer:
     def __init__(self, host, port):
@@ -45,8 +46,8 @@ class TestServer:
 
     def upload_run(self):
         logging.info(f"Test upload server on port {UPLOAD_PORT}")
-        with open(LUA_SCRIPT, 'r') as lua_app:
-            lua_script = lua_app.read() + '\n'
+        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
+            lua_script = lua_app.read()
 
         while self.upload_running:
             try:
@@ -64,7 +65,7 @@ class TestServer:
 
     def download_run(self):
         logging.info(f"Test download server on port {DOWNLOAD_PORT}")
-        with open(LUA_SCRIPT, 'r') as lua_app:
+        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
             lua_script = lua_app.read()
 
         while self.download_running:
@@ -138,7 +139,7 @@ class TestServer:
                 message = self.generate_message()
                 conn.sendall(message.encode())
                 logging.debug(f"sent: {message}")
-                time.sleep(1)
+                time.sleep(.5)
         except Exception as e:
             logging.debug(f"Error handling connection: {e}")
         finally:
@@ -164,7 +165,7 @@ class TestServer:
     @staticmethod
     def generate_message():
         sensor_id = random.choice(['w'])
-        value = random.uniform(0, 100)
+        value = random.uniform(0, 10000)/1e3
         unit = 'kg'
         message = f"%{sensor_id},{value:.2f}{unit}#\n"
         return message

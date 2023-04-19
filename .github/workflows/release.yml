@@ -44,7 +44,7 @@
         - name: Build
           run: |
             pyinstaller marel_marine_scale_controller.spec
-            powershell Compress-Archive .\dist\marel_marine_scale_controller\ -DestinationPath marel_marine_scale_controller.zip
+            powershell Compress-Archive .\dist\marel_marine_scale_app\ -DestinationPath marel_marine_scale_app.zip
         - name: Upload release asset
           id: upload-release-asset
           uses: actions/upload-release-asset@v1
@@ -52,8 +52,8 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ needs.make_release.outputs.upload_url }}
-            asset_path: .\marel_marine_scale_controller.zip
-            asset_name: marel_marine_scale_controller-windows.zip
+            asset_path: .\marel_marine_scale_app.zip
+            asset_name: marel_marine_scale_app-windows.zip
             asset_content_type: application/octet-stream
 
 
@@ -74,7 +74,7 @@
       - name: Build
         run: |
           pyinstaller marel_marine_scale_controller.spec
-          zip -r marel_marine_scale_controller.zip ./dist/marel_marine_scale_controller/
+          zip -r marel_marine_scale_app.zip ./dist/marel_marine_scale_app/
       - name: Upload release asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -82,8 +82,8 @@
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.make_release.outputs.upload_url }}
-          asset_path: ./marel_marine_scale_controller.zip
-          asset_name: marel_marine_scale_controller-linux.zip
+          asset_path: ./marel_marine_scale_app.zip
+          asset_name: marel_marine_scale_app-linux.zip
           asset_content_type: application/octet-stream
 
 

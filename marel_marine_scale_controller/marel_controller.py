@@ -31,6 +31,7 @@ class Controller:
         self.is_listening = False
         self.is_connecting = False
         self.client: MarelClient = MarelClient()
+        self.auto_enter = True
 
     def start_listening(self):
         self.connect_client()
@@ -44,7 +45,7 @@ class Controller:
 
     def connect_client(self):
         self.is_connecting = True
-        self.client.connect(self.host, self.comm_port)
+        self.client.connect(self.host, self.comm_port, timeout=1)
         self.is_connecting = False
 
     def stop_listening(self):
@@ -85,20 +86,16 @@ class Controller:
             if prefix == 'k':
                 self.to_keyboard(value)
 
-    @staticmethod
-    def to_keyboard(value: Union[float, int, str, bool], auto_enter=True):
+    def to_keyboard(self, value: Union[float, int, str, bool]):
         """Print the `value` (as a string) where the cursor is.
 
         Parameters
         ----------
         value :
             Value to print.66.01
-
-        auto_enter :
-            If True, the `enter` key is pressed.
         """
         pag.write(str(value))
-        if auto_enter is True:
+        if self.auto_enter is True:
             pag.press('enter')
 
     def set_units(self, units: str):
@@ -131,14 +128,16 @@ class Controller:
 
         if upload_client.is_connected:
             while True:
-                received += upload_client.receive(allow_timeout=True)
+                received += upload_client.receive(allow_timeout=True, split=False)
 
-                if count > 5:
+                if count > 10:
                     break
                 count += 1
 
             upload_client.close()
-            received_lua_script = '\n'.join(received)
+
+            received_lua_script = ''.join(received)
+
             logging.info('Lua Script uploaded from scale.')
 
             if received_lua_script == sent_lua_script:
