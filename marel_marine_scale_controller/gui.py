@@ -152,7 +152,7 @@ class GUI:
         if self.controller:
             self.controller.stop_listening()
 
-        while self.controller.is_listening or self.controller.is_connecting: #-------------------maybe not needed
+        while self.controller.is_listening or self.controller.client.is_connecting: #-------------------maybe not needed
             time.sleep(.1)
 
     def set_units(self, unit):
@@ -202,10 +202,10 @@ class GUI:
 
     def refresh_led(self):
         if self.controller:
-            if self.controller.is_listening:
-                self.led_canvas.itemconfig(self.led, fill="green")
-            elif self.controller.is_connecting:
+            if self.controller.client.is_connecting:
                 self.led_canvas.itemconfig(self.led, fill="yellow")
+            elif self.controller.is_listening and self.controller.client.is_connected:
+                self.led_canvas.itemconfig(self.led, fill="green")
             else:
                 self.led_canvas.itemconfig(self.led, fill="red")
         else:
@@ -213,7 +213,7 @@ class GUI:
 
     def refresh_buttons(self):
         if self.controller:
-            if self.controller.is_connecting:
+            if self.controller.client.is_connecting:
                 self.disable_input()
                 self.start_button.config(state='disable')
                 self.stop_button.config(state='normal')

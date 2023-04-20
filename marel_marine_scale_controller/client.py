@@ -10,17 +10,33 @@ class MarelClient:
         self.host = None
         self.port = None
         self.socket = None
+        self.timeout = 5
         self.is_connected = False
+        self.is_connecting = False
         self.auto_reconnect = True
         self.reconnect_delay = 2
         self.data = None
 
-    def connect(self, host, port, single_try=True, timeout=1):
+    def connect(self, host: str, port: int, single_try=True, timeout: float=1):
+        """
+
+        Parameters
+        ----------
+        host :
+        port :
+
+        single_try :
+            If True, it will only try to connect once.
+        timeout :
+            Timeout value (seconds) for the connection attemps.
+
+        """
         self.data = b''
         self.host = host
         self.port = port
         self.auto_reconnect = True
 
+        self.is_connecting = True
         while self.auto_reconnect:
             logging.info(f'Trying to connect ... {host}:{port}')
             try:
@@ -29,7 +45,7 @@ class MarelClient:
                 self.socket.connect((self.host, self.port))
                 logging.info("Client Socket Connected")
                 self.is_connected = True
-                self.socket.settimeout(5)
+                self.socket.settimeout(self.timeout)
                 break
             except OSError as err:
                 # INFO:root:Connection failed. OSError [Errno 113] No route to host GOT THIS ON WIFI
@@ -45,6 +61,7 @@ class MarelClient:
                 time.sleep(1)  #Small delay after a failed single connection attemp. Help with the GUI>
                 break
 
+        self.is_connecting = False
         self.auto_reconnect = True
 
     def send(self, command: str):
@@ -55,8 +72,14 @@ class MarelClient:
             self.close()
             return None
 
-    def receive(self, allow_timeout=True, split=True) -> list:
+    def receive(self, allow_timeout=False, split=True, split_char: bytes=b"\n") -> list:
         """Will try to reconnect if an OSError is raise on receive.
+
+        Timeout Error is internally raised and caught if no bytes are received.
+
+        If a Timeout error is raised an allow_timeout is False, the socket will be closed
+        setting `self.is_connected` to False. If `self.auto_reconnect` is True, it will attempt
+        to reconnect (within the receive method).
 
         Parameters
         ----------
@@ -66,6 +89,8 @@ class MarelClient:
         split :
             If True, messages are split on newline and the last value is
             put back in the received buffer.
+        split_char :
+            Character for splitting. Mus be a byte string.
 
         """
         while True:
@@ -93,7 +118,7 @@ class MarelClient:
             self.data += received
 
             if split is True:
-                messages = self.data.split(b'\n')
+                messages = self.data.split(split_char)
                 if len(messages) > 1:
                     self.data = messages.pop()
                     return [message.decode(MAREL_MSG_ENCODING) for message in messages]

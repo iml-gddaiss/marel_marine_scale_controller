@@ -10,6 +10,8 @@ import pyautogui as pag
 from marel_marine_scale_controller import COMM_PORT, DOWNLOAD_PORT, UPLOAD_PORT
 from marel_marine_scale_controller.client import MarelClient
 
+RECEIVE_SLEEP = 0.05
+
 logging.basicConfig(level=logging.DEBUG)
 
 UNITS_CONVERSION = {
@@ -29,12 +31,12 @@ class Controller:
         self.units = "kg"
         self.weight: float = None
         self.is_listening = False
-        self.is_connecting = False
         self.client: MarelClient = MarelClient()
         self.auto_enter = True
 
     def start_listening(self):
-        self.connect_client()
+        self.client.connect(self.host, self.comm_port, timeout=1)
+
         if self.client.is_connected:
             try:
                 self.is_listening = True
@@ -42,11 +44,6 @@ class Controller:
             except Exception as err:
                 logging.error(f'Error on listening {err}')
                 self.client.disconnect()
-
-    def connect_client(self):
-        self.is_connecting = True
-        self.client.connect(self.host, self.comm_port, timeout=1)
-        self.is_connecting = False
 
     def stop_listening(self):
         self.is_listening = False
@@ -61,14 +58,14 @@ class Controller:
     def run(self):
         logging.info('Start Controller ')
         while self.is_listening:
-            data = self.client.receive()
+            data = self.client.receive(allow_timeout=False, split=True)
             if not data:
                 continue
 
             for message in data:
                 logging.debug(f'Received Messages: {message}')
                 self.process_message(message)
-            time.sleep(0.01)
+            time.sleep(RECEIVE_SLEEP)
 
     def process_message(self, message):
         pattern = "%(\S),(-?\d+.\d+)(\S+)#"
