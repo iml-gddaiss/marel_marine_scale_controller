@@ -23,7 +23,7 @@ end
 
 
 function connection_status_display(screen)
-    if CommActive(output_port) == 1 then
+  if CommActive(output_port) == 1 then
      DispStr(screen, 1, 27, "   [Connected]")
   else
     DispStr(screen, 1, 27, "[Disconnected]")
@@ -37,24 +37,16 @@ function set_display(disp, screen)
   if disp == "main" then
     DispStr(screen, 1, 1, "  Programs")
     DispStr(screen, 2, 1, "  --------")
-    DispStr(screen, 3, 1, "    [Prog1]: Sends weight on key press.")
-    DispStr(screen, 4, 1, "    [Prog2]: Always sends weight.")
+    DispStr(screen, 3, 1, "    [Prog1]: Prints weight on key press.")
     DispStr(screen, 10, 1, "  Prog 1")
-    DispStr(screen, 10, 11, "  Prog 2")
     DispStr(screen, 10, 21, "  Reboot")
     connection_status_display(screen)
   elseif disp == "prog_1" then
     DispStr(screen, 1, 1, "  -- Running program 1 --")
-    DispStr(screen, 2, 1, "    ```Sends weight on key press.'''")
-    DispStr(screen, 3, 1, "    [send]: Send weight.")
-    DispStr(screen, 4, 1, "    [stop]: Stop program 1")
-    DispStr(screen, 10, 1, "   Send")
-    DispStr(screen, 10, 11, "   Stop")
-    connection_status_display(screen)
-  elseif disp == "prog_2" then
-    DispStr(screen, 1, 1, "  -- Running program 2 --")
-    DispStr(screen, 2, 1, "    ```Always sends weight.'''")
-    DispStr(screen, 3, 1, "     [stop]: Stop program 2")
+    DispStr(screen, 2, 1, "    ```Prints weight on key press'''")
+    DispStr(screen, 3, 1, "    [Print]: Print weight")
+    DispStr(screen, 4, 1, "    [Stop]: Stop program 1")
+    DispStr(screen, 10, 1, "  Print")
     DispStr(screen, 10, 11, "   Stop")
     connection_status_display(screen)
   elseif disp == "reload" then
@@ -79,13 +71,14 @@ function run_prog_1(port, screen)
   set_display('prog_1', screen)
 
   while 1 do
+    connection_status_display(screen)
     display_weight(screen)
     event, value = NextEvent(0)
     if event == 'softkey' and DispGetScr() == screen then
       if value == 1 then
         send_weight(port, 'k')
-        DispStr(screen,9,1, "  >>>>>>>>>>>>>>> SENT <<<<<<<<<<<<<<<  ")
-        sleep(1)
+        DispStr(screen,9,1, "                >>>> SENT <<<<  ")
+        sleep(.5)
         DispStr(screen,9,1, "                                        ")
         --[this here is to prevent double press of the send button]
         while NextEvent(0) == "softkey" do
@@ -101,26 +94,6 @@ function run_prog_1(port, screen)
     end
   end
   print("Exiting program 1")
-end
-
-
-function run_prog_2(port, screen)
-  print('Launching prog 2')
-
-  set_display('prog_2', screen)
-
-  while 1 do
-    display_weight(screen)
-    send_weight(port, 'w')
-    event, value = NextEvent(0)
-    if event == 'softkey' and DispGetScr() == screen then
-      if value == 2 then
-        print('Exiting loop')
-        break
-      end
-    end
-  end
-  print("Exiting program 2")
 end
 
 
@@ -140,10 +113,6 @@ function run_main()
       if value == 1 then
         print('Starting prog 1')
         run_prog_1(output_port, screen)
-
-      elseif value == 2 then
-        print('Starting prog 2')
-        run_prog_2(output_port, screen)
 
       elseif value == 3 then
         print('Restarting Lua Interpreter')

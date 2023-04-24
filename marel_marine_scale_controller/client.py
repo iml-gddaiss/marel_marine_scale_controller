@@ -10,7 +10,7 @@ class MarelClient:
         self.host = None
         self.port = None
         self.socket = None
-        self.timeout = 5
+        self.timeout = 2
         self.is_connected = False
         self.is_connecting = False
         self.auto_reconnect = True

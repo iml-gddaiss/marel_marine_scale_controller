@@ -126,7 +126,7 @@ class GUI:
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        self.refresh_display()
+        self.refresh_window()
 
     def run(self):
         self.root.mainloop()
@@ -217,15 +217,14 @@ class GUI:
                 self.disable_input()
                 self.start_button.config(state='disable')
                 self.stop_button.config(state='normal')
+            elif self.controller.is_listening:
+                self.disable_input()
+                self.start_button.config(state='disable')
+                self.stop_button.config(state='normal')
             else:
-                if self.controller.is_listening:
-                    self.disable_input()
-                    self.start_button.config(state='disable')
-                    self.stop_button.config(state='normal')
-                else:
-                    self.enable_input()
-                    self.start_button.config(state='normal')
-                    self.stop_button.config(state='disable')
+                self.enable_input()
+                self.start_button.config(state='normal')
+                self.stop_button.config(state='disable')
         else:
             self.enable_input()
             self.start_button.config(state='normal')
@@ -235,8 +234,10 @@ class GUI:
         if self.controller:
             self.units.config(state='normal')
             self.auto_enter_button.config(state='normal')
+            if self.controller.client.is_connecting:
+                self.weight_value.set("-  ")
 
-            if self.controller.is_listening:
+            elif self.controller.is_listening and self.controller.client.is_connected:
                 weight = self.controller.get_weight()
                 if weight is not None:
                     if self.controller.units == 'kg':
@@ -250,12 +251,12 @@ class GUI:
             self.units.config(state='disable')
             self.auto_enter_button.config(state='disable')
 
-    def refresh_display(self):
+    def refresh_window(self):
         self.refresh_buttons()
         self.refresh_weight()
         self.refresh_led()
 
-        self.root.after(100, self.refresh_display)
+        self.root.after(100, self.refresh_window)
 
     def on_close(self):
         if self.controller is not None:
