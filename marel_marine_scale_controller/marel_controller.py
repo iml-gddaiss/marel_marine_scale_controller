@@ -164,6 +164,8 @@ class MarelController:
 
             if prefix == 'p':
                 self.to_keyboard(value)
+        else:
+            self.weight = None
 
     def to_keyboard(self, value: Union[float, int, str, bool]):
         """Print the `value` (as a string) where the cursor is (emulates a keyboard entry).
@@ -178,11 +180,12 @@ class MarelController:
             pag.press('enter')
 
     def set_units(self, units: str):
-        """
+        """Change the weight units.
 
         Parameters
         ----------
-        units
+        units : ['kg', 'g', 'lb', 'oz']
+            new weight units.
 
         Raises
         ------
@@ -195,6 +198,31 @@ class MarelController:
             raise ValueError(f'Invalid units. Available units: {list(UNITS_CONVERSION.keys())}.')
 
     def update_lua_code(self, filename: str):
+        """Update the scale Lua code.
+
+        New clients are made to download and upload the Lua Code.
+
+        First the Lua file is downloaded (to the scale). Then the Scale Lua code is
+        uploaded (from the scale) and compared to the file sent for confirmation.
+
+        The download and upload ports are hardcoded in the scale software.
+            Download port: 52202
+            Upload port: 52203
+
+
+        Parameters
+        ----------
+        filename :
+            Lua code file.
+
+        Returns
+        -------
+        -1 : (Failed) Scale not reach or file failed to download (to the scale).
+        0 : (Failed) File downloaded (to the scale) but could not upload (from the scale) the Lua code
+            or the uploaded and downloaded Lua code were no identical.
+        1 : (Succeeded) The file download (to the scale) was the same as the one uploaded (from the scale).
+
+        """
         download_client = MarelClient()
         download_client.connect(self.host, DOWNLOAD_PORT, single_try=True)
 

@@ -26,6 +26,9 @@ def save_config(config):
 
 
 class GUI:
+    """
+    Gui Application for the MarelController.
+    """
     def __init__(self, host: str = None):
         self.controller = None
 
@@ -38,6 +41,7 @@ class GUI:
         self.init_layout()
 
     def init_layout(self):
+        """Init the Gui Window layout"""
         pady = 2
         padx = 2
 
@@ -127,9 +131,11 @@ class GUI:
         self.refresh_window()
 
     def run(self):
+        """Start (run) the App"""
         self.root.mainloop()
 
     def start_listening(self):
+        """Wrapper function for the MarelController start_listening methods."""
         self.start_button.config(state='disable')
         self.host = self.host_entry.get()
         save_config({'host': self.host})
@@ -142,9 +148,11 @@ class GUI:
         else:
             self.controller.host = self.host
 
-        self.controller.start_listening()
+        self.start_listening_thread = threading.Thread(target=self.controller.start_listening)
+        self.start_listening_thread.start()
 
     def stop_listening(self):
+        """Wrapper function for the MarelController stop_listening methods."""
         self.stop_button.config(state='disable')
         if self.controller:
             self.controller.stop_listening()
@@ -153,11 +161,13 @@ class GUI:
             time.sleep(.1)
 
     def set_units(self, unit):
+        """Wrapper function for the MarelController set_units methods."""
         if self.controller:
             self.controller.set_units(unit)
             time.sleep(.1)
 
     def auto_enter(self):
+        """Change the value of the MarelController auto_enter attribute."""
         if self.controller:
             if self.controller.auto_enter is True:
                 self.controller.auto_enter = False
@@ -167,9 +177,11 @@ class GUI:
                 self.auto_enter_button.config(relief='sunken', text='ON')
 
     def update_lua_app(self):
+        """Call `self.run_update_lua` from another thread."""
         threading.Thread(target=self.run_update_lua, daemon=True).start()
 
     def run_update_lua(self):
+        """Wrapper function for the MarelController update_lua_app methods."""
         self.update_lua_button.config(state='disable')
         self.update_status.set(f"updating")
 
@@ -191,12 +203,6 @@ class GUI:
 
         self.update_lua_button.config(state='normal')
 
-    def disable_input(self):
-        self.host_entry.config(state='disable')
-
-    def enable_input(self):
-        self.host_entry.config(state='normal')
-
     def refresh_led(self):
         if self.controller:
             if self.controller.client.is_connecting:
@@ -211,19 +217,19 @@ class GUI:
     def refresh_buttons(self):
         if self.controller:
             if self.controller.client.is_connecting:
-                self.disable_input()
+                self.host_entry.config(state='disable')
                 self.start_button.config(state='disable')
                 self.stop_button.config(state='normal')
             elif self.controller.is_listening:
-                self.disable_input()
+                self.host_entry.config(state='disable')
                 self.start_button.config(state='disable')
                 self.stop_button.config(state='normal')
             else:
-                self.enable_input()
+                self.host_entry.config(state='normal')
                 self.start_button.config(state='normal')
                 self.stop_button.config(state='disable')
         else:
-            self.enable_input()
+            self.host_entry.config(state='normal')
             self.start_button.config(state='normal')
             self.stop_button.config(state='disable')
 
@@ -241,6 +247,8 @@ class GUI:
                         self.weight_value.set(f"{weight:.04f} {self.controller.units} ")
                     else:
                         self.weight_value.set(f"{weight:.01f} {self.controller.units} ")
+                else:
+                    self.weight_value.set("-  ")
             else:
                 self.weight_value.set("-  ")
         else:
