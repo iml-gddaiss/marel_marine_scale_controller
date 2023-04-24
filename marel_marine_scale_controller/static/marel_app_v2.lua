@@ -76,7 +76,7 @@ function run_prog_1(port, screen)
     event, value = NextEvent(0)
     if event == 'softkey' and DispGetScr() == screen then
       if value == 1 then
-        send_weight(port, 'k')
+        send_weight(port, 'p')
         DispStr(screen,9,1, "                >>>> SENT <<<<  ")
         sleep(.5)
         DispStr(screen,9,1, "                                        ")

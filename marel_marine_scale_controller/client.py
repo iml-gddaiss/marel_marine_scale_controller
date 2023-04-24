@@ -17,18 +17,23 @@ class MarelClient:
         self.reconnect_delay = 2
         self.data = None
 
-    def connect(self, host: str, port: int, single_try=True, timeout: float=1):
-        """
+    def connect(self, host: str, port: int, single_try=True, timeout=1):
+        """Connect socket to `host:post`.
+
+        Connection attempts are made while `self.auto_reconnect` is True and until connected unless
+        `single_try` is True. While attempting to connect, `self.is_connecting` is set to True.
+
+        When done connecting (or not), self.auto_reconnect` is always set to True.
 
         Parameters
         ----------
-        host :
-        port :
+        host : IP Address of the host.
+        port : Port Number to connect to.
 
         single_try :
             If True, it will only try to connect once.
         timeout :
-            Timeout value (seconds) for the connection attemps.
+            Timeout value (seconds) for the connection attempts.
 
         """
         self.data = b''
@@ -64,22 +69,35 @@ class MarelClient:
         self.is_connecting = False
         self.auto_reconnect = True
 
-    def send(self, command: str):
+    def send(self, message: str):
+        """Send message via `self.socket`.
+
+        Call `self.close()` on OSError.
+
+        Parameters
+        ----------
+        message :
+            Message to send.
+
+        Returns
+        -------
+            Receive Bytes or None.
+        """
         try:
-            return self.socket.sendall(command.encode(MAREL_MSG_ENCODING))
+            self.socket.sendall(message.encode(MAREL_MSG_ENCODING))
         except OSError as err:
             logging.debug(f'MAREL: OSError on sendall: {err}')
             self.close()
-            return None
 
     def receive(self, allow_timeout=False, split=True, split_char: bytes=b"\n") -> list:
-        """Will try to reconnect if an OSError is raise on receive.
+        """Receive message via `self.socket`.
 
-        Timeout Error is internally raised and caught if no bytes are received.
+        Will try to reconnect if an OSError is caught on receive.
 
-        If a Timeout error is raised an allow_timeout is False, the socket will be closed
-        setting `self.is_connected` to False. If `self.auto_reconnect` is True, it will attempt
-        to reconnect (within the receive method).
+        Timeout Error is internally raised if no bytes are received.
+
+        If a Timeout error is raised an `self.allow_timeout` is False, the socket will be closed
+        setting `self.is_connected` to False. If `self.auto_reconnect` is True, `self.connect` is called.
 
         Parameters
         ----------
@@ -90,8 +108,11 @@ class MarelClient:
             If True, messages are split on newline and the last value is
             put back in the received buffer.
         split_char :
-            Character for splitting. Mus be a byte string.
+            Character for splitting. Must be a byte string.
 
+        Returns
+        -------
+        List of decoded messages or empty list.
         """
         while True:
             try:
@@ -128,12 +149,16 @@ class MarelClient:
                 return message
 
     def disconnect(self):
-        """Force disconnection of the socket e.i Use Shutdown"""
+        """Force disconnection of the socket.
+
+        `self.auto_reconnect` is set to False to prevent auto-reconnection and `self.close` is called.
+
+        """
         self.auto_reconnect = False
         self.close()
 
     def close(self):
-        """Close the socket"""
+        """Close the socket and set `self.is_connected` to False."""
         if self.socket:
             self.socket.close()
         self.is_connected = False

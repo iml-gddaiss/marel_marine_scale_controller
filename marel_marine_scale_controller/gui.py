@@ -1,4 +1,3 @@
-import os
 import platform
 import json
 import threading
@@ -7,7 +6,7 @@ import tkinter as tk
 from pathlib import Path
 
 from marel_marine_scale_controller import LUA_SCRIPT_PATH, CONFIG_PATH
-from marel_marine_scale_controller.marel_controller import Controller
+from marel_marine_scale_controller.marel_controller import MarelController
 
 PROGRAM_DIRECTORY = Path(__file__).parent
 
@@ -28,7 +27,6 @@ def save_config(config):
 
 class GUI:
     def __init__(self, host: str = None):
-        self.listening_thread = None
         self.controller = None
 
         if host:
@@ -137,15 +135,14 @@ class GUI:
         save_config({'host': self.host})
 
         if not self.controller:
-            self.controller = Controller(self.host)
+            self.controller = MarelController(self.host)
             if self.controller.auto_enter is True:
                 self.auto_enter_button.config(relief='sunken')
 
         else:
             self.controller.host = self.host
 
-        self.listening_thread = threading.Thread(target=self.controller.start_listening)
-        self.listening_thread.start()
+        self.controller.start_listening()
 
     def stop_listening(self):
         self.stop_button.config(state='disable')
@@ -178,7 +175,7 @@ class GUI:
 
         if not self.controller:
             host = self.host_entry.get()
-            self.controller = Controller(host)
+            self.controller = MarelController(host)
 
         flag = self.controller.update_lua_code(ABS_LUA_SCRIPT_PATH)
 
