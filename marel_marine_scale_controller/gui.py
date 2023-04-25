@@ -51,6 +51,13 @@ ABS_LUA_SCRIPT_PATH = str(PROGRAM_DIRECTORY.joinpath(LUA_SCRIPT_PATH))
 ABS_CONFIG_PATH = str(PROGRAM_DIRECTORY.joinpath(CONFIG_PATH))
 ABS_LOGO_PATH = str(PROGRAM_DIRECTORY.joinpath(LOGO_PATH))
 
+COLOR_LIGHT_RED = '#E2C8C8'
+COLOR_LIGHT_GREEN = '#AAC893'
+COLOR_WHITE = "#FFFFFF"
+COLOR_ROSE = "#F7B7C2"
+COLOR_GREY = '#C0C0C0'
+COLOR_BLUE_GREY = '#AAC8C1'
+
 
 def load_config():
     with open(ABS_CONFIG_PATH, 'r') as f:
@@ -68,9 +75,10 @@ class GUI:
 
     Examples
     --------
-        gui = GUI()
-        gui.run()
+    >>>  gui = GUI()
+    >>>  gui.run()
     """
+
     def __init__(self, host: str = None):
         self.controller: MarelController = None
         self.start_listening_thread: threading.Thread = None
@@ -87,19 +95,18 @@ class GUI:
         padx = 2
 
         self.root = tk.Tk()
-
         self.root.title("Marel App")
 
         if platform.system() == "Windows":
             self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
-            XX, YY = 280, 305
+            XX, YY = 280, 305  # px
         else:
-            XX, YY = 230, 230
+            XX, YY = 230, 230  # px
 
         self.root.minsize(XX, YY)
         self.root.maxsize(XX, YY)
 
-        ##### Row 0  HOST | INPUT
+        ### Row 0  HOST | INPUT
         row0 = tk.Frame(self.root)
 
         host_label = tk.Label(row0, text="Host:", width=5)
@@ -109,61 +116,68 @@ class GUI:
         host_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
         self.host_entry.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
 
-        ##### Row 1 UPDATE STATUS | UPDATE BUTTON
+        ### Row 1 UPDATE STATUS | UPDATE BUTTON
         row1 = tk.Frame(self.root)
         self.update_status = tk.StringVar(value="----")
         update_status_label = tk.Label(row1, textvariable=self.update_status, relief='sunken', width=10)
-        self.update_lua_button = tk.Button(row1, text="Update Lua App", command=self.update_lua_app, bg='#AAC8C1')
+        self.update_lua_button = tk.Button(row1, text="Update Lua App", command=self.update_lua_app, bg=COLOR_BLUE_GREY)
 
         update_status_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
         self.update_lua_button.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
 
-        ##### Row 2  Statys | Led | Start | Stop Button
+        ### Row 2  Statys | Led | Start | Stop Button
         row2 = tk.Frame(self.root)
 
         # LED indicator
-        status_label = tk.Label(row2, text='Status:',)
+        status_label = tk.Label(row2, text='Status:', )
         self.led_canvas = tk.Canvas(row2, height=20, width=20)
         self.led = self.led_canvas.create_oval(5, 5, 16, 16, fill="red")
 
         w = 7 if platform.system() == 'Windows' else 5
-        self.start_button = tk.Button(row2, text="Start", command=self.start_listening, bg='#AAC893', width=w)
-        self.stop_button = tk.Button(row2, text="Stop", command=self.stop_listening, state='disable', bg='#E2C8C8', width=w)
+        self.start_button = tk.Button(row2, text="Start", command=self.start_listening, bg=COLOR_LIGHT_GREEN, width=w)
+        self.stop_button = tk.Button(
+            row2, text="Stop", command=self.stop_listening, state='disable', bg=COLOR_LIGHT_RED, width=w
+        )
 
         status_label.grid(row=0, column=0, columnspan=1, sticky='ew')
         self.led_canvas.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
         self.start_button.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
         self.stop_button.grid(row=0, column=4, columnspan=1, sticky='ew', padx=2)
 
-        ##### Row 3 Weight
+        ### Row 3 Weight
         row3 = tk.Frame(self.root)
         # Weight display
-        self.weight_value = tk.StringVar(value="-"*7)
-        weight_value_label = tk.Label(row3, textvariable=self.weight_value,  height=2, border=1, relief='sunken',
-                                      anchor='e', bg="#F7B7C2", fg="#FFFFFF", bd=5, font=('jetbrains mono', 18, 'bold'), width=12)
-        weight_value_label.grid(row=0, column=0, columnspan=1, sticky='ew',  padx=2)
+        self.weight_value = tk.StringVar(value="-" * 7)
+        weight_value_label = tk.Label(
+            row3, textvariable=self.weight_value, height=2, border=1, relief='sunken',
+            anchor='e', bg=COLOR_ROSE, fg=COLOR_WHITE, bd=5, font=('jetbrains mono', 18, 'bold'),
+            width=12
+        )
+        weight_value_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
 
-        ##### Row 4 Auto-Enter | Units
+        ### Row 4 Auto-Enter | Units
         row4 = tk.Frame(self.root)
         self.auto_enter_var = tk.BooleanVar()
         auto_enter_label = tk.Label(row4, text=' auto-enter:')
-        self.auto_enter_button = tk.Button(row4, text='ON', command=self.auto_enter, bg='#AAC8C1', height=1, width=3)
+        self.auto_enter_button = tk.Button(row4, text='ON', command=self.auto_enter, bg=COLOR_BLUE_GREY, height=1, width=3)
 
         units_label = tk.Label(row4, text=' units:')
         default_unit = tk.StringVar(row4, value='kg')
         units_option = ('kg', 'g')
         self.units = tk.OptionMenu(row4, default_unit, *units_option, command=self.set_units)
-        self.units.config(indicatoron=False, bg='#C0C0C0', width=2)
+        self.units.config(indicatoron=False, bg=COLOR_GREY, width=2)
 
-        #tk.Label(row4, width=7).grid(row=0, column=0)
+        # tk.Label(row4, width=7).grid(row=0, column=0)
         auto_enter_label.grid(row=0, column=0, columnspan=1, sticky='ew', padx=2)
         self.auto_enter_button.grid(row=0, column=1, columnspan=1, sticky='ew', padx=2)
         units_label.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
         self.units.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
 
-        ##### Row 5 Version
+        ### Row 5 Version
         row5 = tk.Frame(self.root)
-        version_label = tk.Label(row5, text=f'Version: {VERSION}', font=('jetbrains mono', 8, 'italic'), justify='left', width=50)
+        version_label = tk.Label(
+            row5, text=f'Version: {VERSION}', font=('jetbrains mono', 8, 'italic'), justify='left', width=50
+        )
         version_label.grid(row=0, column=0, columnspan=1, sticky='e', padx=2)
 
         row0.pack(pady=pady, padx=padx, fill='both', expand=True)
@@ -204,7 +218,7 @@ class GUI:
         if self.controller:
             self.controller.stop_listening()
 
-        while self.controller.is_listening or self.controller.client.is_connecting: #-------------------maybe not needed
+        while self.controller.is_listening or self.controller.client.is_connecting:  # -------------------maybe not needed
             time.sleep(.1)
 
     def set_units(self, unit):
@@ -262,19 +276,10 @@ class GUI:
             self.led_canvas.itemconfig(self.led, fill="red")
 
     def refresh_buttons(self):
-        if self.controller:
-            if self.controller.client.is_connecting:
-                self.host_entry.config(state='disable')
-                self.start_button.config(state='disable')
-                self.stop_button.config(state='normal')
-            elif self.controller.is_listening:
-                self.host_entry.config(state='disable')
-                self.start_button.config(state='disable')
-                self.stop_button.config(state='normal')
-            else:
-                self.host_entry.config(state='normal')
-                self.start_button.config(state='normal')
-                self.stop_button.config(state='disable')
+        if self.controller and (self.controller.client.is_connecting or self.controller.is_listening):
+            self.host_entry.config(state='disable')
+            self.start_button.config(state='disable')
+            self.stop_button.config(state='normal')
         else:
             self.host_entry.config(state='normal')
             self.start_button.config(state='normal')
@@ -288,8 +293,7 @@ class GUI:
                 self.weight_value.set("-  ")
 
             elif self.controller.is_listening and self.controller.client.is_connected:
-                weight = self.controller.get_weight()
-                if weight is not None:
+                if (weight := self.controller.get_weight(self.controller.units)) is not None:
                     if self.controller.units == 'kg':
                         self.weight_value.set(f"{weight:.04f} {self.controller.units} ")
                     else:
@@ -314,12 +318,3 @@ class GUI:
         if self.controller is not None:
             self.controller.stop_listening()
         self.root.destroy()
-
-
-def main():
-    gui = GUI()
-    gui.run()
-
-
-if __name__ == "__main__":
-    main()

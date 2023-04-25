@@ -13,11 +13,11 @@ Lua App:
     The Lua App developed for the Scale (`./static/marel_app_v2.lua`) sends messages of the form:
         `%<prefix>,<weight><units>#\n`,
     where:
-        prefix: `w` or `k`.
+        prefix: `p` or `w`.
         weight: float of variable precision.
         units: Unit of the weight [kg, g, lb ,oz].
-    Messages with a `w` are sent at regular intervals. `k` messages are sent when the assign Scale button is pressed.
-    When receiving `k` messages, the Controller emulates a keyboard entry of that given values.
+    Messages with a `w` are sent at regular intervals. `p` messages are sent when the assign Scale button is pressed.
+    When receiving `p` messages, the Controller emulates a keyboard entry of that given values.
 
 
 Notes
@@ -41,12 +41,9 @@ UNITS_CONVERSION :
 
 Examples
 --------
-```
-controller = MarelController(self.host)
-
-listening_thread = threading.Thread(target=self.controller.start_listening, dameon=True)
-start_listening_thread.start()
-
+>>> controller = MarelController('host')
+>>> listening_thread = threading.Thread(target=controller.start_listening, daemon=True)
+>>> listening_thread.start()
 """
 
 
@@ -54,6 +51,7 @@ import logging
 import re
 import threading
 import time
+from dataclasses import dataclass
 from typing import *
 
 import pyautogui as pag
@@ -70,22 +68,22 @@ UPLOAD_PORT = 52203
 RECEIVE_SLEEP = 0.05
 
 UNITS_CONVERSION = {
-    'kg': 1, 'g': 1e-3, 'lb': 0.453592, 'oz': 0.0283495
+    'kg': 1,
+    'g': 1e-3,
+    'lb': 0.453592,
+    'oz': 0.0283495
 }
 
 
-def convert_units(a, b):
-    """Return conversion factor from unit `a` to unit `b`.
+@dataclass
+class Weight:
+    """Store weight value and units."""
+    value: float
+    units: str
 
-    Possible units are in the `UNITS_CONVERSIONS` dictionnary.
-
-    Examples
-    --------
-        value_lb = value_kg * convert_units('kg', 'lb')
-
-
-    """
-    return UNITS_CONVERSION[a] / UNITS_CONVERSION[b]
+    def get_weight(self, target_units='kg') -> float:
+        """Returns the weight value in the `target_units`"""
+        return self.value * UNITS_CONVERSION[self.units] / UNITS_CONVERSION[target_units]
 
 
 class MarelController:
@@ -100,12 +98,10 @@ class MarelController:
         Communication port used. Lua App Default: 52212
     client :
         MarelClient object use to connect to the scale.
-    received_values :
-        Latest values received from the scale.
     units :
         Desired units for weight.
     weight :
-        Latest weight value.
+        Latest weight stored in a Weight(value, units) dataclass.
     is_listening :
         Is set to True when the controller is listening for messages from the Scale.
     listening_thread :
@@ -118,10 +114,9 @@ class MarelController:
     def __init__(self, host, port=COMM_PORT):
         self.host = host
         self.comm_port = port
-        self.client: MarelClient = MarelClient()
-        self.received_values = {}
+        self.client = MarelClient()
         self.units = "kg"
-        self.weight: float = None
+        self.weight: Weight = None
         self.is_listening = False
         self.auto_enter = True
         self.listening_thread = None
@@ -154,11 +149,6 @@ class MarelController:
         self.is_listening = False
         self.client.disconnect()
 
-    def get_latest_values(self):
-        """Return a copy of `self.receivd_values`.
-        """
-        return self.received_values.copy()
-
     def mute(self):
         """Sets `self.is_muted` to True"""
         self.is_muted = True
@@ -167,9 +157,11 @@ class MarelController:
         """Sets `self.is_muted` to False"""
         self.is_muted = False
 
-    def get_weight(self):
-        """Return `self.weight`"""
-        return self.weight
+    def get_weight(self, units='kg'):
+        """Return the latest weight value in units of `units`"""
+        if self.weight is not None:
+            return self.weight.get_weight(units)
+        return None
 
     def listen(self):
         """Listen and process received message from the scale.
@@ -202,7 +194,7 @@ class MarelController:
             `self.received_values[prefix] = weight`
             `self.weight = weight`
 
-        If the prefix is `k`, `self.to_keyboard(weight) is called.
+        If the prefix is `p`, `self.to_keyboard(weight) is called.
 
         Parameters
         ----------
@@ -218,15 +210,12 @@ class MarelController:
         if match:
             prefix = match.group(1)
             value = match.group(2)
-            unit = match.group(3)
+            units = match.group(3)
 
-            value = float(value) * convert_units(unit, self.units)
-
-            self.received_values[prefix] = value
-            self.weight = value
+            self.weight = Weight(float(value), units)
 
             if prefix == 'p' and not self.is_muted:
-                self.to_keyboard(value)
+                self.to_keyboard(self.weight.get_weight(self.units))
         else:
             self.weight = None
 
@@ -290,16 +279,16 @@ class MarelController:
         download_client.connect(self.host, DOWNLOAD_PORT, single_try=True)
 
         with open(filename, 'r') as lua_app:
-            sent_lua_script = lua_app.read()
+            lua_script = lua_app.read()
 
         if download_client.is_connected:
-            download_client.send(sent_lua_script)
+            download_client.send(lua_script)
             download_client.close()
             logging.info('Lua Script downloaded to scale.')
         else:
             return -1  # Marel not reach
 
-        time.sleep(1)  # Some delay (>0.1) needs to be necessary between download and upload check.
+        time.sleep(1)  # Some delay (>0.1) seems to be necessary between download and upload check.
 
         upload_client = MarelClient()
         upload_client.connect(self.host, UPLOAD_PORT, single_try=True)
@@ -321,7 +310,7 @@ class MarelController:
 
             logging.info('Lua Script uploaded from scale.')
 
-            if received_lua_script == sent_lua_script:
+            if received_lua_script == lua_script:
                 logging.info('Lua script successfully uploaded.')
                 return 1  # Sucess
 

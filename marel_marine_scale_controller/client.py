@@ -49,11 +49,11 @@ class MarelClient:
         self.host = None
         self.port = None
         self.socket = None
-        self.timeout = 2
+        self.timeout = 2  # seconds
         self.is_connected = False
         self.is_connecting = False
         self.auto_reconnect = True
-        self.reconnect_delay = 2
+        self.reconnect_delay = 2  # seconds
         self.data_buffer = None
 
     def connect(self, host: str, port: int, single_try=True, timeout=1):
@@ -104,7 +104,7 @@ class MarelClient:
                     time.sleep(self.reconnect_delay)
                     continue
 
-                time.sleep(1)  #Small delay after a failed single connection attemp. Help with the GUI>
+                time.sleep(1)  # Small delay after a failed single connection attempt. Help with the GUI>
                 break
 
         self.is_connecting = False
@@ -130,7 +130,7 @@ class MarelClient:
             logging.debug(f'MAREL: OSError on sendall: {err}')
             self.close()
 
-    def receive(self, allow_timeout=False, split=True, split_char: bytes=b"\n") -> list:
+    def receive(self, allow_timeout=False, split=True, split_char: bytes = b"\n") -> list:
         """Receive message via `self.socket`.
 
         Will try to reconnect if an OSError is caught on receive.
@@ -159,7 +159,7 @@ class MarelClient:
             try:
                 received = self.socket.recv(4096)
 
-                if received == b"":              # The Scale is not supposed to send Empty string. Does so on bad connection.
+                if received == b"":  # The Scale is not supposed to send Empty string. Does so on bad connection.
                     raise TimeoutError
 
             except OSError as err:

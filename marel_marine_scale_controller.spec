@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['marel_marine_scale_controller/gui.py'],
+    ['marel_marine_scale_controller/main.py'],
     pathex=[],
     binaries=[],
     datas=[('marel_marine_scale_controller/static', 'static'),
