@@ -1,19 +1,73 @@
-import re
-import time
-import threading
+"""
+Date: April 2023
+
+This module contains the MarelController class that is used to connect and process data from a Marel Marine Scale.
+
+The controller is used to:
+    - Connect ot the Marel Scale via Ethernet.
+    - Upload the Compatible Lua Application to the scale.
+    - Store the latest weight values.
+    - Print received weight values at the current cursor position. (Keyboard Emulation)
+
+Lua App:
+    The Lua App developed for the Scale (`./static/marel_app_v2.lua`) sends messages of the form:
+        `%<prefix>,<weight><units>#\n`,
+    where:
+        prefix: `w` or `k`.
+        weight: float of variable precision.
+        units: Unit of the weight [kg, g, lb ,oz].
+    Messages with a `w` are sent at regular intervals. `k` messages are sent when the assign Scale button is pressed.
+    When receiving `k` messages, the Controller emulates a keyboard entry of that given values.
+
+
+Notes
+-----
+This project was developed with the Marel Marine Scale M2200. There is no guarantee that it will work with other models.
+
+
+Attributes
+----------
+COMM_PORT :
+    Port use to receive scale messages. (Same as in the Lua Code).
+DOWNLOAD_PORT :
+    Default Port to send Lua code to the scale.
+UPLOAD_PORT :
+    Default Port to receive Lua code from the scale.
+RECEIVE_SLEEP :
+    Delay in seconds between message reception.
+UNITS_CONVERSION :
+    Dictionnary containing the ratio between 1 kg different units of weight (g, lb, oz). Use to convert units.
+
+
+Examples
+--------
+```
+controller = MarelController(self.host)
+
+listening_thread = threading.Thread(target=self.controller.start_listening, dameon=True)
+start_listening_thread.start()
+
+"""
+
 
 import logging
-
+import re
+import threading
+import time
 from typing import *
 
 import pyautogui as pag
 
-from marel_marine_scale_controller import COMM_PORT, DOWNLOAD_PORT, UPLOAD_PORT
 from marel_marine_scale_controller.client import MarelClient
 
-RECEIVE_SLEEP = 0.05
-
 logging.basicConfig(level=logging.DEBUG)
+
+COMM_PORT = 52212
+DOWNLOAD_PORT = 52202
+UPLOAD_PORT = 52203
+
+
+RECEIVE_SLEEP = 0.05
 
 UNITS_CONVERSION = {
     'kg': 1, 'g': 1e-3, 'lb': 0.453592, 'oz': 0.0283495
@@ -36,7 +90,7 @@ def convert_units(a, b):
 
 class MarelController:
     """
-    Controller for Marel Marine Scale using the `marel_app_v2.lua` app.
+    Controller for Marel Marine Scale (M2200) using the `./static/marel_app_v2.lua` app.
 
     Attributes
     ----------
@@ -58,8 +112,8 @@ class MarelController:
         Thread used to call `self.listen()`
     auto_enter :
         When `True`, the `enter` is pressed after printing the weight value.
-
-
+    is_muted :
+        When True, the keyboard emulation is disabled.
     """
     def __init__(self, host, port=COMM_PORT):
         self.host = host
@@ -71,6 +125,7 @@ class MarelController:
         self.is_listening = False
         self.auto_enter = True
         self.listening_thread = None
+        self.is_muted = False
 
     def start_listening(self):
         """Connect client to the Scale and start listening.
@@ -103,6 +158,14 @@ class MarelController:
         """Return a copy of `self.receivd_values`.
         """
         return self.received_values.copy()
+
+    def mute(self):
+        """Sets `self.is_muted` to True"""
+        self.is_muted = True
+
+    def unmute(self):
+        """Sets `self.is_muted` to False"""
+        self.is_muted = False
 
     def get_weight(self):
         """Return `self.weight`"""
@@ -162,7 +225,7 @@ class MarelController:
             self.received_values[prefix] = value
             self.weight = value
 
-            if prefix == 'p':
+            if prefix == 'p' and not self.is_muted:
                 self.to_keyboard(value)
         else:
             self.weight = None

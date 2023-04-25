@@ -1,3 +1,36 @@
+"""
+Date: April 2023
+
+GUI Application used to interact with the MarelController.
+
+Usages
+------
+    Running the script will launch the Gui App::
+        $ python gui.py
+
+
+Notes
+-----
+The last host ip address used is store in `./config/gui_config.json`
+
+Attributes
+----------
+PROGRAM_DIRECTORY :
+    Directory when the SCript was run.
+LUA_SCRIPT_PATH :
+    Relative path to the Lua Script.
+CONFIG_PATH :
+    Relative path to the gui configuration file.
+LOGO_PATH:
+    Relative path to the gui app logo.
+ABS_LUA_SCRIPT_PATH :
+    Absolute path to the Lua Script.
+ABS_CONFIG_PATH :
+    Absolute path to the gui configuration file.
+ABS_LOGO_PATH:
+    Absolute path to the gui app logo.
+
+"""
 import platform
 import json
 import threading
@@ -5,14 +38,18 @@ import time
 import tkinter as tk
 from pathlib import Path
 
-from marel_marine_scale_controller import LUA_SCRIPT_PATH, CONFIG_PATH
+from marel_marine_scale_controller import VERSION
 from marel_marine_scale_controller.marel_controller import MarelController
 
 PROGRAM_DIRECTORY = Path(__file__).parent
 
+LUA_SCRIPT_PATH = "static/marel_app_v2.lua"
+CONFIG_PATH = "config/gui_config.json"
+LOGO_PATH = "static/logo.ico"
+
 ABS_LUA_SCRIPT_PATH = str(PROGRAM_DIRECTORY.joinpath(LUA_SCRIPT_PATH))
 ABS_CONFIG_PATH = str(PROGRAM_DIRECTORY.joinpath(CONFIG_PATH))
-ABS_LOGO_PATH = str(PROGRAM_DIRECTORY.joinpath("static/logo.ico"))
+ABS_LOGO_PATH = str(PROGRAM_DIRECTORY.joinpath(LOGO_PATH))
 
 
 def load_config():
@@ -28,9 +65,15 @@ def save_config(config):
 class GUI:
     """
     Gui Application for the MarelController.
+
+    Examples
+    --------
+        gui = GUI()
+        gui.run()
     """
     def __init__(self, host: str = None):
-        self.controller = None
+        self.controller: MarelController = None
+        self.start_listening_thread: threading.Thread = None
 
         if host:
             self.host = host
@@ -38,10 +81,8 @@ class GUI:
             config = load_config()
             self.host = config['host']
 
-        self.init_layout()
+        ###Init the Gui Window layout###
 
-    def init_layout(self):
-        """Init the Gui Window layout"""
         pady = 2
         padx = 2
 
@@ -51,9 +92,9 @@ class GUI:
 
         if platform.system() == "Windows":
             self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
-            XX, YY = 280, 290
+            XX, YY = 280, 305
         else:
-            XX, YY = 230, 210
+            XX, YY = 230, 230
 
         self.root.minsize(XX, YY)
         self.root.maxsize(XX, YY)
@@ -120,11 +161,17 @@ class GUI:
         units_label.grid(row=0, column=2, columnspan=1, sticky='ew', padx=2)
         self.units.grid(row=0, column=3, columnspan=1, sticky='ew', padx=2)
 
+        ##### Row 5 Version
+        row5 = tk.Frame(self.root)
+        version_label = tk.Label(row5, text=f'Version: {VERSION}', font=('jetbrains mono', 8, 'italic'), justify='left', width=50)
+        version_label.grid(row=0, column=0, columnspan=1, sticky='e', padx=2)
+
         row0.pack(pady=pady, padx=padx, fill='both', expand=True)
         row1.pack(pady=pady, padx=padx, fill='both')
         row2.pack(pady=pady, padx=padx, fill='both')
         row3.pack(pady=pady, padx=padx, fill='both')
         row4.pack(pady=pady, padx=padx, fill='both')
+        row5.pack(pady=pady, padx=padx, fill='both')
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -148,7 +195,7 @@ class GUI:
         else:
             self.controller.host = self.host
 
-        self.start_listening_thread = threading.Thread(target=self.controller.start_listening)
+        self.start_listening_thread = threading.Thread(target=self.controller.start_listening, daemon=True)
         self.start_listening_thread.start()
 
     def stop_listening(self):
@@ -274,4 +321,5 @@ def main():
     gui.run()
 
 
-main()
+if __name__ == "__main__":
+    main()

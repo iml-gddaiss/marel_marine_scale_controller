@@ -4,7 +4,7 @@ import random
 import time
 import logging
 
-from marel_marine_scale_controller import LUA_SCRIPT_PATH
+from marel_marine_scale_controller.marel_controller import LUA_SCRIPT_PATH
 
 DOWNLOAD_PORT = 52202
 UPLOAD_PORT = 52203
