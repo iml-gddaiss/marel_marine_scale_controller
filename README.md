@@ -52,6 +52,8 @@ then set the following:
 
 ## Scale Lua Application
 
+The Lua Application is displayed on screen #2 (2-Application).
+
 <p align='center'>
 <img src='docs/images/marel_main_annotated.png' width='600' alt="Scale main display"/>
 </p>
@@ -72,7 +74,7 @@ When a print message is sent the screen will display this message: `>>>> SENT <<
 
 ## GUI Python Application
 <p align='center'>
-<img src='docs/images/marel_gui_annoted.png' width='2' alt="Python gui app" />
+<img src='docs/images/marel_gui_annotated.png' width='1000' alt="Python gui app" />
 </p>
 
 On first usage, the Lua Script needs to be uploaded to the scale. This can be done even when the app is not connected to the scale. 
@@ -94,7 +96,7 @@ The scale has 7 different tcp servers ports for communication, from the document
 + 52203 upload Lua source
 + 52210 Lua standard output, for example using Lua print()
 + 52211 message port “comm4” in Lua, persistent output queue
-+ 52212 terminal port “comm5” in Lua
++ 52212 terminal port “comm5” in Luae
 + 52213 remote host port “comm6” in Lua 
 
 Note:
