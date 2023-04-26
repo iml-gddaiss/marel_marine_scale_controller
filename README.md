@@ -18,7 +18,7 @@ Download [here](https://github.com/iml-gddaiss/marel_marine_scale_controller/rel
 
 ## GUI Python Application
 
-![figure_gui](docs/images/marel_gui_all_annoted.png)
+![figure_gui](docs/images/marel_gui_annoted.png)
 
 
 
