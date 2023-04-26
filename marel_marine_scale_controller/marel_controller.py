@@ -6,8 +6,8 @@ This module contains the MarelController class that is used to connect and proce
 The controller is used to:
     - Connect ot the Marel Scale via Ethernet.
     - Upload the Compatible Lua Application to the scale.
-    - Store the latest weight values.
-    - Print received weight values at the current cursor position. (Keyboard Emulation)
+    - Store the latest weight value and units.
+    - Print the latest received weight value in a given units at the current cursor position. (Keyboard Emulation)
 
 Lua App:
     The Lua App developed for the Scale (`./static/marel_app_v2.lua`) sends messages of the form:
