@@ -2,7 +2,7 @@
 Python Controller and Lua application for Marel Marine Scale M2200. 
 The GUI application will essentially turn a Marel Marine Scale into a keyboard.
 
-Note that this project was developed with the Marel Marine Scale M2200. Therefor, there are no guarantees that it will work with other models.
+Note that this project was developed with the Marel Marine Scale M2200. Therefore, there are no guarantees that it will work with other models.
 
 
 # Description
