@@ -15,11 +15,22 @@ Download [here](https://github.com/iml-gddaiss/marel_marine_scale_controller/rel
 
 ## Scale
 
+<p align='center'>
+<img src='docs/images/marel_main.jpg' width='2766' alt="Scale main display"/>
+</p>
+<p align='center'>
+<img src='docs/images/marel_prog_1.jpg' width='2654' alt="Scale prog 1 display"/>
+</p>
+<p align='center'>
+<img src='docs/images/marel_sent.jpg' width='2763' alt="Scale sent display"/>
+</p>
 
 ## GUI Python Application
+<p align='center'>
+<img src='docs/images/marel_gui_annoted.png' width='2424' alt="Python gui app" />
+</p>
 
-![figure_gui](docs/images/marel_gui_annoted.png)
-
+For first time usage, the Lua Script needs to be uploaded to the scale. This can be done even when the app is not connected to the scale. 
 
 
 # Additional Information
