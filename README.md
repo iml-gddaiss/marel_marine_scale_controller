@@ -1,10 +1,9 @@
 # marel_marine_scale_controller
-Python Controller and Lua application for Marel Marine Scale M2200. 
-The GUI application will essentially turn a Marel Marine Scale M2200 into a keyboard.
+Python Application to connect to a Marel Marine Scale M2200 and turn weight measurements into keyboard entry.
 
 Note that this project was developed with the Marel Marine Scale M2200. Therefore, there are no guarantees that it will work with other models.
 
-# Table of Content
+# Table of Contents
 
 1. [Download](#download)
 2. [Requirements](#requirements)
@@ -21,8 +20,8 @@ The GUI App is packaged as standalone (self-contained) executable for Windows an
 
 For Windows:
 1. Download from the latest release [here](https://github.com/iml-gddaiss/marel_marine_scale_controller/releases) 
-2. Unzip `marel_marine_scale_app-windows.zip`
-3. Run `marel_marine_scale_app.exe`
+2. Unzip `MarelApp-windows.zip`
+3. Run `MarelApp.exe`
 
 # Requirements
 
@@ -68,7 +67,7 @@ For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user
 **Note** On first usage, the Lua Script needs to be uploaded to the scale. see section [Python Application](#python-application) 
 
 
-The Lua Application is displayed on screen #2, the `2-Application` page in the page menu.
+On the scale, the Lua Application is displayed on the `2-Application` page. The page is accessible from the page menu (screen #2) or by cycling through the page (see section [Marel Marine Scale M220](#marel-marine-scale-m2200))
 
 <p align='center'>
 <img src='docs/images/marel_main_annotated.png' width='600' alt="Scale main display"/>
@@ -91,7 +90,7 @@ When receiving a `Print` messages, the Python Application emulates a keyboard en
 
 When a print message is sent the screen will display this message: `>>>> SENT <<<<`
 
-## Python Application
+## Python Application 
 
 The [GUI](marel_marine_scale_controller/gui.py) is used to interface with the [Controller](marel_marine_scale_controller/marel_controller.py) which is used to:
 
@@ -121,7 +120,7 @@ When listening, the controller:
 >>> controller.get_weight(units='kg')
 ```
 
-### The GUI
+### The GUI | MarelApp
 <p align='center'>
 <img src='docs/images/marel_gui_annotated.png' width='1000' alt="Python gui app" />
 </p>
@@ -133,10 +132,10 @@ When listening, the controller:
 ## About the Marel Marine Scale M2200
 The Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) doesn't really tell you how to connect to and interact with the scale. The following explanation is thus mostly empirical. 
 
-The scale has an empty Lua file in its memory. This file can be overwritten by uploading a Lua files to the scale. 
-Then, if the scale (parameter](TODO: Add to Guide) "Run Lua Script" is `On`, the script is run in loop by a Lua interpreter.
-IMPORTANT: It seems that a new Lua Interpreter is launch each time, thus the Lua Script should itself be looping to avoid closing and opening new interpreters which cost time.
-Also, if a new Lua script is uploaded to the scale, it will only be run when a new Lua interpreter is started, thus if one is already running, it needs to be closed. 
+The scale has allocated memory for a Lua script which can be written/overwritten by uploading a Lua files to the scale if the option `Allow Lua source update` set to `yes` (see section [Marel Marine Scale M2200](#marel-marine-scale-m2200). 
+Then, if the scale options `Run Lua Script` is set to `Yes`, the script is run in loop by a Lua interpreter.
+It seems like a new Lua Interpreter is used on each loop, thus the Lua Script should itself be looping to avoid closing and opening new interpreters each time which cost time.
+Note that a new interpreter needs to be launched for a Lua code update to be run, thus if one is already running, it needs to close. 
 
 The scale has 7 different tcp servers ports for communication, from the documentation we have:
 
@@ -153,9 +152,9 @@ Note:
 - The port `52211`, `52212` and `52213` can be use has Communications port.
 
 
-While it seems that some of the "built-in" Lua functions are missing from the Lua interpreter (however I might be wrong here),
-the Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) provides a list of available Lua functions with to interface with the scale and manipulate strings.
-Using the Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) and the Lua script to be used with the Python app ([marel_app_v2.lua](marel_marine_scale_controller/static/marel_app_v2.lua)), one could make their own Lua Sript for the Scale.
+While it seems that some of the "built-in" Lua functions are missing from the Lua interpreter (note that I might be wrong here),
+the Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) provides a list of available Lua functions to interface with the scale and manipulate (format) weight values.
+Using the Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) and the Lua script provided ([marel_app_v2.lua](marel_marine_scale_controller/static/marel_app_v2.lua)), one could figure out how to make their own Lua application for the Scale.
 
 
 
