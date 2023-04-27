@@ -59,6 +59,11 @@ For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user
 + `4-System Setup -> System -> Settings`
   + `Packing` : `Nominal weight`
 
+Set the IP address, to any available on your local network, (TODO VÉRIFIER)
++ `4-System Setup -> System -> Configuration -> Communications`
+  + `Ip Address`: `192.168.X.XXX`
+  
+
 
 
 
