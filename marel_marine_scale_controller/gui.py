@@ -163,7 +163,7 @@ class GUI:
 
         units_label = tk.Label(row4, text=' units:')
         default_unit = tk.StringVar(row4, value='kg')
-        units_option = ('kg', 'g')
+        units_option = ('kg', 'g', 'lb', 'oz')
         self.units = tk.OptionMenu(row4, default_unit, *units_option, command=self.set_units)
         self.units.config(indicatoron=False, bg=COLOR_GREY, width=2)
 
@@ -298,8 +298,14 @@ class GUI:
                 if (weight := self.controller.get_weight(self.controller.units)) is not None:
                     if self.controller.units == 'kg':
                         self.weight_value.set(f"{weight:.04f} {self.controller.units} ")
-                    else:
+                    elif self.controller.units == 'lb':
+                        self.weight_value.set(f"{weight:.04f} {self.controller.units} ")
+                    elif self.controller.units == 'oz':
+                        self.weight_value.set(f"{weight:.03f} {self.controller.units} ")
+                    elif self.controller.units == 'g':
                         self.weight_value.set(f"{weight:.01f} {self.controller.units} ")
+                    else:
+                        raise ValueError('Invalid weight units.')
                 else:
                     self.weight_value.set("-  ")
             else:

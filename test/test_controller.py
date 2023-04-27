@@ -216,3 +216,8 @@ def test_controller_get_weight():
 
 def test_update_lua():
     assert CONTROLLER.update_lua_code(ABS_LUA_SCRIPT_PATH) == 1
+
+
+
+if __name__ == '__main__':
+    start_server()
