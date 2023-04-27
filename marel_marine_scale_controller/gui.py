@@ -38,14 +38,10 @@ import time
 import tkinter as tk
 from pathlib import Path
 
-from marel_marine_scale_controller import VERSION
+from marel_marine_scale_controller import VERSION, LUA_SCRIPT_PATH, CONFIG_PATH, LOGO_PATH
 from marel_marine_scale_controller.marel_controller import MarelController
 
 PROGRAM_DIRECTORY = Path(__file__).parent
-
-LUA_SCRIPT_PATH = "static/marel_app_v2.lua"
-CONFIG_PATH = "config/gui_config.json"
-LOGO_PATH = "static/logo.ico"
 
 ABS_LUA_SCRIPT_PATH = str(PROGRAM_DIRECTORY.joinpath(LUA_SCRIPT_PATH))
 ABS_CONFIG_PATH = str(PROGRAM_DIRECTORY.joinpath(CONFIG_PATH))
@@ -59,16 +55,6 @@ COLOR_GREY = '#C0C0C0'
 COLOR_BLUE_GREY = '#AAC8C1'
 
 
-def load_config():
-    with open(ABS_CONFIG_PATH, 'r') as f:
-        return json.load(f)
-
-
-def save_config(config):
-    with open(ABS_CONFIG_PATH, 'w') as f:
-        json.dump(config, f)
-
-
 class GUI:
     """
     Gui Application for the MarelController.
@@ -76,17 +62,27 @@ class GUI:
     Examples
     --------
     >>>  gui = GUI()
-    >>>  gui.run_comm_port()
+    >>>  gui.run()
     """
 
-    def __init__(self, host: str = None):
+    def __init__(
+            self,
+            host: str = None,
+            lua_script_path=ABS_LUA_SCRIPT_PATH,
+            config_path=ABS_CONFIG_PATH,
+            logo_path=ABS_LOGO_PATH
+    ):
+        self.lua_script_path = lua_script_path
+        self.config_path = config_path
+        self.logo_path = logo_path
+
         self.controller: MarelController = None
         self.start_listening_thread: threading.Thread = None
 
         if host:
             self.host = host
         else:
-            config = load_config()
+            config = self.load_config()
             self.host = config['host']
 
         ###Init the Gui Window layout###
@@ -98,7 +94,7 @@ class GUI:
         self.root.title("Marel App")
 
         if platform.system() == "Windows":
-            self.root.iconbitmap(bitmap=ABS_LOGO_PATH)
+            self.root.iconbitmap(bitmap=self.logo_path)
             XX, YY = 280, 305  # px
         else:
             XX, YY = 230, 230  # px
@@ -199,7 +195,7 @@ class GUI:
         """Wrapper function for the MarelController start_listening methods."""
         self.start_button.config(state='disable')
         self.host = self.host_entry.get()
-        save_config({'host': self.host})
+        self.save_config()
 
         if not self.controller:
             self.controller = MarelController(self.host)
@@ -252,7 +248,7 @@ class GUI:
             host = self.host_entry.get()
             self.controller = MarelController(host)
 
-        flag = self.controller.update_lua_code(ABS_LUA_SCRIPT_PATH)
+        flag = self.controller.update_lua_code(self.lua_script_path)
 
         match flag:
             case -1:
@@ -326,3 +322,11 @@ class GUI:
         if self.controller is not None:
             self.controller.stop_listening()
         self.root.destroy()
+
+    def load_config(self):
+        with open(self.config_path, 'r') as f:
+            return json.load(f)
+
+    def save_config(self):
+        with open(self.config_path, 'w') as f:
+            json.dump({'host': self.host}, f)
