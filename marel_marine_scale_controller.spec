@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['marel_marine_scale_controller/gui.py'],
+    ['marel_marine_scale_controller/main.py'],
     pathex=[],
     binaries=[],
     datas=[('marel_marine_scale_controller/static', 'static'),
@@ -27,7 +27,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='marel_marine_scale_app',
+    name='MarelApp',
     debug=False,
     icon='./marel_marine_scale_controller/static/logo.ico',
     bootloader_ignore_signals=False,
@@ -48,5 +48,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='marel_marine_scale_app',
+    name='MarelApp',
 )

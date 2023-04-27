@@ -79,11 +79,12 @@ function run_prog_1(port, screen)
   set_display('prog_1', screen)
 
   while 1 do
+    connection_status_display(screen)
     display_weight(screen)
     event, value = NextEvent(0)
     if event == 'softkey' and DispGetScr() == screen then
       if value == 1 then
-        send_weight(port, 'k')
+        send_weight(port, 'p')
         DispStr(screen,9,1, "  >>>>>>>>>>>>>>> SENT <<<<<<<<<<<<<<<  ")
         sleep(1)
         DispStr(screen,9,1, "                                        ")
@@ -110,6 +111,7 @@ function run_prog_2(port, screen)
   set_display('prog_2', screen)
 
   while 1 do
+    connection_status_display(screen)
     display_weight(screen)
     send_weight(port, 'w')
     event, value = NextEvent(0)

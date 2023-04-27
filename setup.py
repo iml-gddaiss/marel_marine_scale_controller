@@ -6,7 +6,7 @@ setup(
     version=VERSION,
     author="JeromeJGuay",
     author_email="jerome.guay@dfo-mpo.gc.ca",
-    description="""Marel Marine Scale Controller App.""",
+    description="""Marel Marine Scale MarelController App.""",
     long_description_content_type="text/markdown",
     url="https://github.com/iml-gddaiss/marel_marine_scale_controller",
     packages=find_packages(),
