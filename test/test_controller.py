@@ -1,21 +1,19 @@
 import socket
 import threading
-import random
 import time
 import logging
 
 from marel_marine_scale_controller.gui import LUA_SCRIPT_PATH
-from marel_marine_scale_controller.marel_controller import COMM_PORT
+from marel_marine_scale_controller.marel_controller import COMM_PORT, MarelController, DOWNLOAD_PORT, UPLOAD_PORT
 
 HOST = "localhost"
 
-DOWNLOAD_PORT = 52202
-UPLOAD_PORT = 52203
+ABS_LUA_SCRIPT_PATH = "../marel_marine_scale_controller/" + LUA_SCRIPT_PATH
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 
-class TestServer:
+class Server:
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -35,50 +33,6 @@ class TestServer:
         self.download_thread = None
 
         logging.info(f'Test server host: {host}')
-
-    def run_comm_port(self):
-        logging.info(f"Test server listening on port {self.port}")
-        while self.running:
-            try:
-                conn, addr = self._socket.accept()
-                logging.info(f"Test server accepted connection from {addr}")
-                threading.Thread(target=self.handle_connection, args=(conn, addr[1])).start()
-            except Exception as e:
-                logging.debug(f"Error accepting connection: {e}")
-                time.sleep(1)
-
-    def run_upload(self):
-        logging.info(f"Test upload server on port {UPLOAD_PORT}")
-        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
-            lua_script = lua_app.read()
-
-        while self.upload_running:
-            try:
-                conn, addr = self._upload_socket.accept()
-                logging.info(f"Test upload Server accepted connection from {addr}")
-                #time.sleep(2)
-                conn.sendall(lua_script.encode())
-                logging.info("send all done")
-                #time.sleep(1)
-                conn.close()
-
-            except Exception as e:
-                logging.debug(f"upload Test Error accepting connection: {e}")
-                time.sleep(1)
-
-    def run_download(self):
-        logging.info(f"Test download server on port {DOWNLOAD_PORT}")
-        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
-            lua_script = lua_app.read()
-
-        while self.download_running:
-            try:
-                conn, addr = self._download_socket.accept()
-                conn.close()
-                logging.info(f"Test Download Server accepted connection from {addr}")
-            except Exception as e:
-                logging.debug(f"Download Test Error accepting connection: {e}")
-                time.sleep(1)
 
     def start_comm_port(self, number_of_connections=5):
         logging.info('Starting Test')
@@ -137,6 +91,50 @@ class TestServer:
         self.upload_thread = threading.Thread(target=self.run_upload, daemon=True)
         self.upload_thread.start()
 
+    def run_comm_port(self):
+        logging.info(f"Test server listening on port {self.port}")
+        while self.running:
+            try:
+                conn, addr = self._socket.accept()
+                logging.info(f"Test server accepted connection from {addr}")
+                threading.Thread(target=self.handle_connection, args=(conn, addr[1])).start()
+            except Exception as e:
+                logging.debug(f"Error accepting connection: {e}")
+                time.sleep(1)
+
+    def run_upload(self):
+        logging.info(f"Test upload server on port {UPLOAD_PORT}")
+        with open(ABS_LUA_SCRIPT_PATH, 'r') as lua_app:
+            lua_script = lua_app.read()
+
+        while self.upload_running:
+            try:
+                conn, addr = self._upload_socket.accept()
+                logging.info(f"Test upload Server accepted connection from {addr}")
+                # time.sleep(2)
+                conn.sendall(lua_script.encode())
+                logging.info("send all done")
+                # time.sleep(1)
+                conn.close()
+
+            except Exception as e:
+                logging.debug(f"upload Test Error accepting connection: {e}")
+                time.sleep(1)
+
+    def run_download(self):
+        logging.info(f"Test download server on port {DOWNLOAD_PORT}")
+        with open(LUA_SCRIPT_PATH, 'r') as lua_app:
+            lua_script = lua_app.read()
+
+        while self.download_running:
+            try:
+                conn, addr = self._download_socket.accept()
+                conn.close()
+                logging.info(f"Test Download Server accepted connection from {addr}")
+            except Exception as e:
+                logging.debug(f"Download Test Error accepting connection: {e}")
+                time.sleep(1)
+
     def handle_connection(self, conn, name):
         self.conns[name] = conn
         try:
@@ -144,14 +142,14 @@ class TestServer:
                 message = self.generate_message()
                 conn.sendall(message.encode())
                 logging.debug(f"sent: {message}")
-                time.sleep(2)
+                time.sleep(.2)
         except Exception as e:
             logging.debug(f"Error handling connection: {e}")
         finally:
             conn.close()
             self.conns.pop(name)
 
-    def stop(self):
+    def close_all(self):
         self.running = False
         self.download_running = False
         for k, v in self.conns.items():
@@ -171,34 +169,50 @@ class TestServer:
 
     @staticmethod
     def generate_message():
-        sensor_id = random.choice(['w'])
-        value = random.uniform(0, 10000)/1e3
-        unit = 'kg'
-        message = f"%{sensor_id},{value:.2f}{unit}#\n"
-        return message
+        #sensor_id = random.choice(['w'])
+        #value = random.uniform(0, 10000)/1e3
+        #unit = 'kg'
+        #message = f"%{sensor_id},{value:.2f}{unit}#\n"
+        #return message
+        return "%w,1.000kg#\n"
+
 
     def send_to(self, name, msg):
         self.conns[name].sendall(msg.encode())
 
 
 def start_server():
-    server = TestServer(HOST, COMM_PORT)
+    server = Server(HOST, COMM_PORT)
     server.start_comm_port()
+    server.start_download()
+    server.start_upload()
     return server
 
 
-def download_test(s: TestServer):
-    s.start_download()
+def start_controller():
+    controller = MarelController(host=HOST)
+    controller.start_listening()
+    return controller
 
 
-def upload_test(s: TestServer):
-    s.start_upload()
+SERVER = start_server()
+CONTROLLER = start_controller()
 
 
-if __name__ == "__main__":
-    HOST = "localhost"
-    PORT = 52212
+def test_controller_weight_value():
+    assert CONTROLLER.weight.value == 1.000
 
-    s = TestServer(HOST, PORT)
 
-    s.start_download()
+def test_controller_weight_units():
+    assert CONTROLLER.weight.units == 'kg'
+
+
+def test_controller_get_weight():
+    assert CONTROLLER.weight.get_weight('g') == 1000
+    assert CONTROLLER.weight.get_weight('kg') == 1.000
+    assert CONTROLLER.weight.get_weight('lb') == 2.2046
+    assert CONTROLLER.weight.get_weight('oz') == 35.2740
+
+
+def test_update_lua():
+    assert CONTROLLER.update_lua_code(ABS_LUA_SCRIPT_PATH) == 1

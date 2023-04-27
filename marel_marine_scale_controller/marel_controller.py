@@ -3,7 +3,7 @@ Date: April 2023
 
 This module contains the MarelController class that is used to connect and process data from a Marel Marine Scale.
 
-The controller is used to:
+The CONTROLLER is used to:
     - Connect ot the Marel Scale via Ethernet.
     - Upload the Compatible Lua Application to the scale.
     - Store the latest weight value and units.
@@ -41,8 +41,8 @@ UNITS_CONVERSION :
 
 Examples
 --------
->>> controller = MarelController('host')
->>> controller.start_listening()
+>>> CONTROLLER = MarelController('host')
+>>> CONTROLLER.start_listening()
 """
 
 
@@ -82,7 +82,7 @@ class Weight:
 
     def get_weight(self, target_units='kg') -> float:
         """Returns the weight value in the `target_units`"""
-        return self.value * UNITS_CONVERSION[self.units] / UNITS_CONVERSION[target_units]
+        return round(self.value * UNITS_CONVERSION[self.units] / UNITS_CONVERSION[target_units], 4)
 
 
 class MarelController:
@@ -102,7 +102,7 @@ class MarelController:
     weight :
         Latest weight stored in a Weight(value, units) dataclass.
     is_listening :
-        Is set to True when the controller is listening for messages from the Scale.
+        Is set to True when the CONTROLLER is listening for messages from the Scale.
     listening_thread :
         Thread used to call `self.listen()`
     auto_enter :
