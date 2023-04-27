@@ -63,6 +63,7 @@ For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user
 
 
 ## Scale Lua Application
+The Lua Application runs on the Marel Scale.
 
 **Note** On first usage, the Lua Script needs to be uploaded to the scale. see section [Python Application](#python-application) 
 
