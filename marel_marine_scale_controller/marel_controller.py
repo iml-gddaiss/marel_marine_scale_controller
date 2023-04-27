@@ -42,8 +42,7 @@ UNITS_CONVERSION :
 Examples
 --------
 >>> controller = MarelController('host')
->>> listening_thread = threading.Thread(target=controller.start_listening, daemon=True)
->>> listening_thread.start()
+>>> controller.start_listening()
 """
 
 

@@ -1,15 +1,22 @@
 # marel_marine_scale_controller
 Python Controller and Lua application for Marel Marine Scale M2200. 
-The GUI application will essentially turn a Marel Marine Scale into a keyboard.
+The GUI application will essentially turn a Marel Marine Scale M2200 into a keyboard.
 
 Note that this project was developed with the Marel Marine Scale M2200. Therefore, there are no guarantees that it will work with other models.
 
+# Table of Content
 
-# Description
+1. [Download](#download)
+2. [Requirements](#requirements)
+3. [Usage](#usage) 
+   * 3.1 [Marel Marine Scale M2202](#marel-marine-scale-m2200)
+   * 3.2 [Lua Application](#scale-lua-application)
+   * 3.3 [Python Application](#python-application)
+4. [Additionnal information](#additional-information)
 
 # Download
 
-The GUI App is packaged as standalone executable for Windows and Linux.
+The GUI App is packaged as standalone (self-contained) executable for Windows and Linux.
 
 
 For Windows:
@@ -17,15 +24,19 @@ For Windows:
 2. Unzip `marel_marine_scale_app-windows.zip`
 3. Run `marel_marine_scale_app.exe`
 
-# Package requirements
+# Requirements
+
 + Python >= 3.10
 
 # Usage
 
-## Scale
+## Marel Marine Scale M2200
 
-(Default Service Password: 62735)
-(Default W&M Config password: 322225)
+[//]: # (From the Marel [documentation]&#40;./docs/marel_marine_m2200_user_guide.pdf&#41; )
+
+`(Default Service Password: 62735)`
+
+`(Default W&M Config password: 322225)`
 
 The `Page` key:
 <p align='center'>
@@ -34,37 +45,45 @@ The `Page` key:
 
  
 + Press the `Page` key to browse through the pages and to exit pages.
-+ Hold the `Page` to access the scale menu.
++ Hold the `Page` to access the scale menu fom which you can access the different pages (screens). 
 
-The follow options are required in order to use the Python Application: 
+The follow settings options are required in order to use the Scale with the Python Application.
+From the Menu page: go to options page,
 
-From the Menu page go to options page,
++ `4-System Setup -> System -> Configuration -> Options`
+  + `Select top menu cycle` : `2-Application [Yes]`
+  + `Allow Lua source update` : `Yes`
+  + `Run Lua script` : `Yes`
 
-`4-System Settings -> System -> Configuration -> Options`,
+For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user_guide.pdf)
+(TODO tester les differents Packing.)
++ `4-System Setup -> System -> Settings`
+  + `Packing` : `Nominal weight`
 
-then set the following: 
 
-+ Select top menu cycle : 2-Application [x]
-+ Allow Lua source update : Yes
-+ Run Lua script : Yes
 
-... set packing (?) TODO
 
 ## Scale Lua Application
 
-The Lua Application is displayed on screen #2 (2-Application).
+**Note** On first usage, the Lua Script needs to be uploaded to the scale. see section [Python Application](#python-application) 
+
+
+The Lua Application is displayed on screen #2, the `2-Application` page in the page menu.
 
 <p align='center'>
 <img src='docs/images/marel_main_annotated.png' width='600' alt="Scale main display"/>
 </p>
 
-While program 1 is running, weight values are continuously sent to the controller. (e.i. `%w,1.234kg#\n`)
+While program 1 is running, weight values are continuously sent (e.i. `%w,1.234kg#\n`, see section [Additional Information/Lua Script](#lua-script)).
+The Python Application stores the latest values and the GUI displays it.
 
 <p align='center'>
 <img src='docs/images/marel_prog_1.jpg' width='600' alt="Scale prog 1 display"/>
 </p>
 
-Pressing the `Print` key sends a print message to the python controller. (e.i. `%p,1.234kg#\n`) (see section [Additional Information/Lua Script](#lua-script))
+Pressing the `Print` key sends a print message (e.i. `%p,1.234kg#\n`, see section [Additional Information/Lua Script](#lua-script)).
+When receiving a `Print` messages, the Python Application emulates a keyboard entry of that given values.
+
 
 <p align='center'>
 <img src='docs/images/marel_sent.jpg' width='600' alt="Scale sent display"/>
@@ -72,12 +91,42 @@ Pressing the `Print` key sends a print message to the python controller. (e.i. `
 
 When a print message is sent the screen will display this message: `>>>> SENT <<<<`
 
-## GUI Python Application
+## Python Application
+
+The [GUI](marel_marine_scale_controller/gui.py) is used to interface with the [Controller](marel_marine_scale_controller/marel_controller.py) which is used to:
+
+### The Controller
+#### Create a Controller
+```Python
+>>> from marel_marine_scale_controller.marel_controller import MarelController
+>>> controller = MarelController('host')
+```
+
+#### Connect the Controller (via ethernet) and start Listening
+```Python
+>>> controller.start_listening()
+```
+When listening, the controller:
+
+- Stores the latest weight value and units (message prefixes `w` and `p`).
+- Prints the latest received weight in a given units at the current cursor position (message prefix `p`).
+
+#### Upload the compatible Lua Script to the Marel Scale
+```Python
+>>> controller.update_lua_code('path/to/script.lua')
+```
+
+#### Get the latest weight value
+```Python
+>>> controller.get_weight(units='kg')
+```
+
+### The GUI
 <p align='center'>
 <img src='docs/images/marel_gui_annotated.png' width='1000' alt="Python gui app" />
 </p>
 
-On first usage, the Lua Script needs to be uploaded to the scale. This can be done even when the app is not connected to the scale. 
+**Note** The `Update Lua App` function doesn't require the App to be Connected since it uses different ports.
 
 
 # Additional Information
@@ -122,12 +171,3 @@ The messages format is as follows `%<prefix>,<weight><units>#\n`, where:
 e.g. `%w,1.234kg#\n`
 Messages with the prefix `"w"` are sent at regular intervals while `"p"` messages are sent when the assign [key](TODO) on the Scale is pressed.
 When receiving `"p"` messages, the Controller emulates a keyboard entry of that given values.
-
-
-## The Python Controller 
-
-The controller is used to:
-    - Connect ot the Marel Scale via Ethernet.
-    - Upload the Compatible Lua Application to the scale.
-    - Store the latest weight value and units.
-    - Print the latest received weight value in a given units at the current cursor position. (Keyboard Emulation)

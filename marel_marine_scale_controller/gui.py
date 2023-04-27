@@ -76,7 +76,7 @@ class GUI:
     Examples
     --------
     >>>  gui = GUI()
-    >>>  gui.run()
+    >>>  gui.run_comm_port()
     """
 
     def __init__(self, host: str = None):
@@ -209,6 +209,7 @@ class GUI:
         else:
             self.controller.host = self.host
 
+        # A thread is use here to prevent the GUI from freezing.
         self.start_listening_thread = threading.Thread(target=self.controller.start_listening, daemon=True)
         self.start_listening_thread.start()
 
@@ -239,6 +240,7 @@ class GUI:
 
     def update_lua_app(self):
         """Call `self.run_update_lua` from another thread."""
+        # A thread is use here because the MarelController doesn't use one.
         threading.Thread(target=self.run_update_lua, daemon=True).start()
 
     def run_update_lua(self):

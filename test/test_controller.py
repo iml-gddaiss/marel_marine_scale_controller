@@ -5,6 +5,9 @@ import time
 import logging
 
 from marel_marine_scale_controller.gui import LUA_SCRIPT_PATH
+from marel_marine_scale_controller.marel_controller import COMM_PORT
+
+HOST = "localhost"
 
 DOWNLOAD_PORT = 52202
 UPLOAD_PORT = 52203
@@ -33,7 +36,7 @@ class TestServer:
 
         logging.info(f'Test server host: {host}')
 
-    def run(self):
+    def run_comm_port(self):
         logging.info(f"Test server listening on port {self.port}")
         while self.running:
             try:
@@ -44,7 +47,7 @@ class TestServer:
                 logging.debug(f"Error accepting connection: {e}")
                 time.sleep(1)
 
-    def upload_run(self):
+    def run_upload(self):
         logging.info(f"Test upload server on port {UPLOAD_PORT}")
         with open(LUA_SCRIPT_PATH, 'r') as lua_app:
             lua_script = lua_app.read()
@@ -63,7 +66,7 @@ class TestServer:
                 logging.debug(f"upload Test Error accepting connection: {e}")
                 time.sleep(1)
 
-    def download_run(self):
+    def run_download(self):
         logging.info(f"Test download server on port {DOWNLOAD_PORT}")
         with open(LUA_SCRIPT_PATH, 'r') as lua_app:
             lua_script = lua_app.read()
@@ -77,7 +80,7 @@ class TestServer:
                 logging.debug(f"Download Test Error accepting connection: {e}")
                 time.sleep(1)
 
-    def start(self, number_of_connections=5):
+    def start_comm_port(self, number_of_connections=5):
         logging.info('Starting Test')
 
         self.running = True
@@ -88,15 +91,16 @@ class TestServer:
                 self._socket.bind((self.host, self.port))
                 break
             except OSError:
-                self.port += 1
+                logging.debug(f'Error, download port {COMM_PORT} unavailable. (Retrying in 2 seconds)')
+                time.sleep(2)
+                #self.port += 1
 
         self._socket.listen(number_of_connections)
-
-        self.thread = threading.Thread(target=self.run, daemon=True)
+        self.thread = threading.Thread(target=self.run_comm_port, daemon=True)
         self.thread.start()
 
-    def start_test_download(self, number_of_connections=5):
-        logging.info('Starting Download test')
+    def start_download(self, number_of_connections=5):
+        logging.info('Starting Download')
 
         self.download_running = True
         self._download_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,10 +115,11 @@ class TestServer:
                 time.sleep(2)
 
         self._download_socket.listen(number_of_connections)
-        self.download_thread = threading.Thread(target=self.download_run, daemon=True)
+        self.download_thread = threading.Thread(target=self.run_download, daemon=True)
         self.download_thread.start()
 
-        #----------------------------------------------------#
+    def start_upload(self, number_of_connections=5):
+        logging.info('Starting Upload')
 
         self.upload_running = True
         self._upload_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -129,7 +134,7 @@ class TestServer:
                 time.sleep(2)
 
         self._upload_socket.listen(number_of_connections)
-        self.upload_thread = threading.Thread(target=self.upload_run, daemon=True)
+        self.upload_thread = threading.Thread(target=self.run_upload, daemon=True)
         self.upload_thread.start()
 
     def handle_connection(self, conn, name):
@@ -160,7 +165,9 @@ class TestServer:
             self._download_socket.close()
             self._download_socket = None
 
-
+        if self._upload_socket:
+            self._upload_socket.close()
+            self._upload_socket = None
 
     @staticmethod
     def generate_message():
@@ -174,10 +181,24 @@ class TestServer:
         self.conns[name].sendall(msg.encode())
 
 
+def start_server():
+    server = TestServer(HOST, COMM_PORT)
+    server.start_comm_port()
+    return server
+
+
+def download_test(s: TestServer):
+    s.start_download()
+
+
+def upload_test(s: TestServer):
+    s.start_upload()
+
+
 if __name__ == "__main__":
     HOST = "localhost"
     PORT = 52212
 
     s = TestServer(HOST, PORT)
-    s.start()
-    s.start_test_download()
+
+    s.start_download()
