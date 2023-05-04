@@ -56,8 +56,6 @@ From the Menu page: go to options page,
 
 [//]: # (For the `Packing`, see page 13 of [documentation]&#40;./docs/marel_marine_m2200_user_guide.pdf&#41;)
 
-[//]: # (&#40;TODO tester les differents Packing.&#41;)
-
 [//]: # (+ `4-System Setup -> System -> Settings -> Packing`)
 
 [//]: # (  + : `Nominal weight`: `Any Weights`)
