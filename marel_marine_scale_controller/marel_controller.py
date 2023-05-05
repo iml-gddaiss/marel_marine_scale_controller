@@ -57,7 +57,6 @@ import pyautogui as pag
 
 from marel_marine_scale_controller.client import MarelClient
 
-logging.basicConfig(level=logging.DEBUG)
 
 COMM_PORT = 52212
 DOWNLOAD_PORT = 52202
