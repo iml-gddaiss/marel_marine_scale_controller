@@ -127,7 +127,7 @@ class MarelController:
         Disconnect the client (and close the client socket) on any exception.
 
         """
-        self.client.connect(self.host, self.comm_port, timeout=1)
+        self.client.connect(self.host, self.comm_port, timeout=1, single_try=True)
 
         if self.client.is_connected:
             try:
