@@ -166,8 +166,8 @@ class MarelClient:
                 if err.errno is None and allow_timeout:
                     return []
 
-                logging.info(f"MAREL: OSError on receive: {err}")
-                logging.debug('Connection lost.')
+                logging.debug(f"MAREL: OSError on receive: {err}")
+                logging.info('Connection lost.')
                 self.close()
 
                 if self.auto_reconnect:
@@ -195,11 +195,13 @@ class MarelClient:
         `self.auto_reconnect` is set to False to prevent auto-reconnection and `self.close` is called.
 
         """
+        logging.info('Disconnecting Client')
         self.auto_reconnect = False
         self.close()
 
     def close(self):
         """Close the socket and set `self.is_connected` to False."""
+        logging.info('Closing Client')
         if self.socket:
             self.socket.close()
         self.is_connected = False

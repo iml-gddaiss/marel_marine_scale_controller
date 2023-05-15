@@ -143,6 +143,7 @@ class MarelController:
 
         Sets `self.is_listening` to False.
         """
+        logging.info('Listening Stopped')
         self.is_listening = False
         self.client.disconnect()
 
