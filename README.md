@@ -54,10 +54,11 @@ From the Menu page: go to the options page,
   + `Allow Lua source update` : `Yes`
   + `Run Lua script` : `Yes`
 
-For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user_guide.pdf)
-(TODO tester les differents Packing.)
-+ `4-System Setup -> System -> Settings`
-  + `Packing` : `Nominal weight`
+[//]: # (For the `Packing`, see page 13 of [documentation]&#40;./docs/marel_marine_m2200_user_guide.pdf&#41;)
+
+[//]: # (+ `4-System Setup -> System -> Settings -> Packing`)
+
+[//]: # (  + : `Nominal weight`: `Any Weights`)
 
 Set the IP address, to any available on your local network, (TODO VÉRIFIER)
 + `4-System Setup -> System -> Configuration -> Communications`

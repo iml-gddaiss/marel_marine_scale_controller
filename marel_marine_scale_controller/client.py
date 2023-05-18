@@ -97,7 +97,7 @@ class MarelClient:
                 break
             except OSError as err:
                 # INFO:root:Connection failed. OSError [Errno 113] No route to host GOT THIS ON WIFI
-                logging.info(f"Connection failed. OSError {err}")
+                logging.debug(f"Connection failed. OSError {err}")
                 if err.errno == 133:
                     logging.info('Host not found, exiting.')
 
