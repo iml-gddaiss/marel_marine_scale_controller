@@ -136,7 +136,7 @@ class MarelController:
                 self.listening_thread.start()
             except Exception as err:
                 logging.error(f'Error on listening {err}')
-                self.client.disconnect()
+                self.stop_listening()
 
     def stop_listening(self):
         """Stop listening and disconnect the client.
