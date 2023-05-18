@@ -47,7 +47,7 @@ The `Page` key:
 + Hold the `Page` to access the scale menu fom which you can access the different pages (screens). 
 
 The follow settings options are required in order to use the Scale with the Python Application.
-From the Menu page: go to options page,
+From the Menu page: go to the options page,
 
 + `4-System Setup -> System -> Configuration -> Options`
   + `Select top menu cycle` : `2-Application [Yes]`
