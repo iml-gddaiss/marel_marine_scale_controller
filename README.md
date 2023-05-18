@@ -47,17 +47,18 @@ The `Page` key:
 + Hold the `Page` to access the scale menu fom which you can access the different pages (screens). 
 
 The follow settings options are required in order to use the Scale with the Python Application.
-From the Menu page: go to options page,
+From the Menu page: go to the options page,
 
 + `4-System Setup -> System -> Configuration -> Options`
   + `Select top menu cycle` : `2-Application [Yes]`
   + `Allow Lua source update` : `Yes`
   + `Run Lua script` : `Yes`
 
-For the `Packing`, see page 13 of [documentation](./docs/marel_marine_m2200_user_guide.pdf)
-(TODO tester les differents Packing.)
-+ `4-System Setup -> System -> Settings`
-  + `Packing` : `Nominal weight`
+[//]: # (For the `Packing`, see page 13 of [documentation]&#40;./docs/marel_marine_m2200_user_guide.pdf&#41;)
+
+[//]: # (+ `4-System Setup -> System -> Settings -> Packing`)
+
+[//]: # (  + : `Nominal weight`: `Any Weights`)
 
 Set the IP address, to any available on your local network, (TODO VÉRIFIER)
 + `4-System Setup -> System -> Configuration -> Communications`
@@ -167,12 +168,12 @@ Using the Marel [documentation](./docs/marel_marine_m2200_user_guide.pdf) and th
 ## Lua Script:
 Apart from the graphical user interface on the Sreen #2 of the scale (see section [Usage/Scale](#scale)), 
 the [Lua application](marel_marine_scale_controller/static/marel_app_v2.lua) is used to send weight measurements over the ethernet communication port `5`(`52212`).
-The messages format is as follows `%<prefix>,<weight><units>#\n`, where:
+The message format is as follows `%<prefix>,<weight><units>#\n`, where:
 ```
     prefix: `"w"` or `"p"`.
     weight: float of variable precision.
     units: Unit of the weight `("kg", "g", "lb", "oz")`.
 ```
 e.g. `%w,1.234kg#\n`
-Messages with the prefix `"w"` are sent at regular intervals while `"p"` messages are sent when the assign [key](TODO) on the Scale is pressed.
+Messages with the prefix `"w"` are sent at regular intervals while `"p"` messages are sent when the assign [key](#scale-lua-application) on the Scale is pressed.
 When receiving `"p"` messages, the Controller emulates a keyboard entry of that given values.

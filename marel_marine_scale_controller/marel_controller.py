@@ -57,8 +57,6 @@ import pyautogui as pag
 
 from marel_marine_scale_controller.client import MarelClient
 
-logging.basicConfig(level=logging.DEBUG)
-
 COMM_PORT = 52212
 DOWNLOAD_PORT = 52202
 UPLOAD_PORT = 52203
@@ -129,7 +127,7 @@ class MarelController:
         Disconnect the client (and close the client socket) on any exception.
 
         """
-        self.client.connect(self.host, self.comm_port, timeout=1)
+        self.client.connect(self.host, self.comm_port, timeout=1, single_try=True)
 
         if self.client.is_connected:
             try:
@@ -138,13 +136,14 @@ class MarelController:
                 self.listening_thread.start()
             except Exception as err:
                 logging.error(f'Error on listening {err}')
-                self.client.disconnect()
+                self.stop_listening()
 
     def stop_listening(self):
         """Stop listening and disconnect the client.
 
         Sets `self.is_listening` to False.
         """
+        logging.info('Listening Stopped')
         self.is_listening = False
         self.client.disconnect()
 

@@ -89,8 +89,10 @@ class MarelClient:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.settimeout(timeout)
                 self.socket.connect((self.host, self.port))
-                logging.info("Client Socket Connected")
                 self.is_connected = True
+
+                self.test_new_connection()  # Check if its is really connected
+
                 self.socket.settimeout(self.timeout)
                 break
             except OSError as err:
@@ -166,8 +168,8 @@ class MarelClient:
                 if err.errno is None and allow_timeout:
                     return []
 
-                logging.info(f"MAREL: OSError on receive: {err}")
-                logging.debug('Connection lost.')
+                logging.debug(f"MAREL: OSError on receive: {err}")
+                logging.info('Connection lost.')
                 self.close()
 
                 if self.auto_reconnect:
@@ -195,11 +197,34 @@ class MarelClient:
         `self.auto_reconnect` is set to False to prevent auto-reconnection and `self.close` is called.
 
         """
+        logging.info('Disconnecting Client')
         self.auto_reconnect = False
         self.close()
 
+    def test_new_connection(self):
+        """Raise OSError if the scale was not really connected.
+
+        The client can still connect to the scale even if the scale is already connected,
+        thus is unavailable.
+
+        This function calls self.receive(allow_timeout=False).
+        The self.receive function will call self.close() if an error occurs.
+
+        If the self.receive raises and error, the connection is close with self.close.
+        This function will then raise an OSError.
+        """
+        self.auto_reconnect = False
+        self.socket.recv(4096) #Test this
+        # self.receive(allow_timeout=False, split=True)
+        # if self.is_connected:
+        #     logging.info("Client Socket Connected")
+        # else:
+        #     logging.info('Device Unavailable')
+        #     raise OSError("Device Unavailable")
+
     def close(self):
         """Close the socket and set `self.is_connected` to False."""
+        logging.info('Closing Client')
         if self.socket:
             self.socket.close()
         self.is_connected = False
