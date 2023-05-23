@@ -37,6 +37,8 @@
 
         - name: Add file to release
           uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             upload_url: ${{ needs.make_release.outputs.upload_url }}
             asset_path: user_guide_en.pdf
