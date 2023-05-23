@@ -54,12 +54,6 @@ From the Menu page: go to the options page,
   + `Allow Lua source update` : `Yes`
   + `Run Lua script` : `Yes`
 
-[//]: # (For the `Packing`, see page 13 of [documentation]&#40;./docs/marel_marine_m2200_user_guide.pdf&#41;)
-
-[//]: # (+ `4-System Setup -> System -> Settings -> Packing`)
-
-[//]: # (  + : `Nominal weight`: `Any Weights`)
-
 Set the IP address, to any available on your local network, (TODO VÉRIFIER)
 + `4-System Setup -> System -> Configuration -> Communications`
   + `Ip Address`: `192.168.X.XXX`
@@ -97,7 +91,7 @@ When receiving a `Print` messages, the Python Application emulates a keyboard en
 
 When a print message is sent the screen will display this message: `>>>> SENT <<<<`
 
-## Python Application 
+## Python Application
 
 The [GUI](marel_marine_scale_controller/gui.py) is used to interface with the [Controller](marel_marine_scale_controller/marel_controller.py) which is used to:
 
