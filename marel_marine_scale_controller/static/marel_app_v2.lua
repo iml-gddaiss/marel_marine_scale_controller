@@ -47,6 +47,7 @@ function set_display(disp, screen)
     DispStr(screen, 3, 1, "    [Print]: Print weight")
     DispStr(screen, 4, 1, "    [Stop]: Stop program 1")
     DispStr(screen, 10, 1, "  Print")
+    DispStr(1, 10, 1, "  Print")
     DispStr(screen, 10, 11, "   Stop")
     connection_status_display(screen)
   elseif disp == "reload" then
@@ -74,7 +75,9 @@ function run_prog_1(port, screen)
     connection_status_display(screen)
     display_weight(screen)
     event, value = NextEvent(0)
-    if event == 'softkey' and DispGetScr() == screen then
+    --if event == 'softkey' and DispGetScr() == screen then
+    -- [ use to only work if you were on the app screen ]
+    if event == 'softkey' then
       if value == 1 then
         send_weight(port, 'p')
         DispStr(screen,9,1, "                >>>> SENT <<<<  ")
