@@ -95,7 +95,7 @@ class GUI:
 
         if platform.system() == "Windows":
             self.root.iconbitmap(bitmap=self.logo_path)
-            XX, YY = 280, 305  # px
+            XX, YY = 285, 305  # px
         else:
             XX, YY = 230, 230  # px
 
