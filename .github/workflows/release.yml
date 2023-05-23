@@ -25,14 +25,14 @@
             draft: true
             prerelease: false
 
-        - name: Checkout code
-          uses: actions/checkout@v2
+        - id: step_upload_url
+          run: echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
 
         - name: Add file to release
           uses: actions/upload-artifact@v2
           with:
-            name: user_guide_en
-            path: user_guide_en.pdf
+            name: user_guide
+            path: user_guide.pdf
 
         - name: Get release ID
           id: get_release
@@ -49,19 +49,16 @@
         - name: Download artifact
           uses: actions/download-artifact@v2
           with:
-            name: user_guide_en
-            path: user_guide_en.pdf
+            name: user_guide
+            path: user_guide.pdf
 
         - name: Add file to release assets
           uses: actions/upload-release-asset@v1
           with:
             upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: user_guide_en.pdf
-            asset_name: user_guide_en.pdf
+            asset_path: user_guide.pdf
+            asset_name: user_guide.pdf
             asset_content_type: application/pdf
-
-#        - id: step_upload_url
-#          run: echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
 
     build_windows:
       runs-on: windows-latest
