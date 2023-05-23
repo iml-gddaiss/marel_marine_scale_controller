@@ -56,7 +56,7 @@ class MarelClient:
         self.reconnect_delay = 2  # seconds
         self.data_buffer = None
 
-    def connect(self, host: str, port: int, single_try=True, timeout=1):
+    def connect(self, host: str, port: int, single_try=True, test_connection=False, timeout=1):
         """Connect socket to `host:post`.
 
         Connection attempts are made while `self.auto_reconnect` is True and until connected unless
@@ -70,9 +70,10 @@ class MarelClient:
             IP Address of the host. Sets the self.host value.
         port :
             Port Number to connect to. Sets the self.port value.
-
         single_try :
             If True, it will only try to connect once.
+        test_connection :
+            If True, the connection is tested.
         timeout :
             Timeout value (seconds) for the connection attempts.
 
@@ -89,18 +90,18 @@ class MarelClient:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.settimeout(timeout)
                 self.socket.connect((self.host, self.port))
-                self.is_connected = True
 
-                self.test_new_connection()  # Check if its is really connected
+                if test_connection is True:
+                    self.test_new_connection()
 
                 self.socket.settimeout(self.timeout)
+                self.is_connected = True
                 break
             except OSError as err:
                 # INFO:root:Connection failed. OSError [Errno 113] No route to host GOT THIS ON WIFI
                 logging.info(f"Connection failed. OSError {err}")
                 if err.errno == 133:
                     logging.info('Host not found, exiting.')
-
                 elif (not single_try) and self.auto_reconnect:
                     logging.info(f"Retrying in {self.reconnect_delay} seconds...")
                     time.sleep(self.reconnect_delay)
@@ -204,23 +205,14 @@ class MarelClient:
     def test_new_connection(self):
         """Raise OSError if the scale was not really connected.
 
-        The client can still connect to the scale even if the scale is already connected,
-        thus is unavailable.
+        The client will briefly connect to the scale even if the scale is already connected
+        to another device, thus is unavailable.
 
-        This function calls self.receive(allow_timeout=False).
-        The self.receive function will call self.close() if an error occurs.
-
-        If the self.receive raises and error, the connection is close with self.close.
-        This function will then raise an OSError.
+        This function calls self.socket.recv(4096).
+        If no data is received, an OSError is raised.
         """
-        self.auto_reconnect = False
-        self.socket.recv(4096) #Test this
-        # self.receive(allow_timeout=False, split=True)
-        # if self.is_connected:
-        #     logging.info("Client Socket Connected")
-        # else:
-        #     logging.info('Device Unavailable')
-        #     raise OSError("Device Unavailable")
+        if not self.socket.recv(4096):
+            raise OSError
 
     def close(self):
         """Close the socket and set `self.is_connected` to False."""
