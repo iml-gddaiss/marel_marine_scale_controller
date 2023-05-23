@@ -30,8 +30,10 @@
 
         - name: Add user guide to release
           uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-            upload_url: ${{ github.event.release.upload_url }}
+            upload_url: ${{ needs.make_release.outputs.upload_url }}
             asset_path: user_guide_en.pdf
             asset_name: user_guide_en.pdf
             asset_content_type: application/pdf
