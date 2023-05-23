@@ -28,36 +28,12 @@
         - id: step_upload_url
           run: echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
 
-        - name: Add file to release
-          uses: actions/upload-artifact@v2
-          with:
-            name: user_guide
-            path: user_guide.pdf
-
-        - name: Get release ID
-          id: get_release
-          uses: actions/github-script@v4
-          with:
-            script: |
-              const release = await github.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: context.ref
-              });
-              console.log(release.data.id);
-
-        - name: Download artifact
-          uses: actions/download-artifact@v2
-          with:
-            name: user_guide
-            path: user_guide.pdf
-
-        - name: Add file to release assets
+        - name: Add user guide to release
           uses: actions/upload-release-asset@v1
           with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: user_guide.pdf
-            asset_name: user_guide.pdf
+            upload_url: ${{ github.event.release.upload_url }}
+            asset_path: user_guide_en.pdf
+            asset_name: user_guide_en.pdf
             asset_content_type: application/pdf
 
     build_windows:
