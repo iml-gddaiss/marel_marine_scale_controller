@@ -203,7 +203,7 @@ class MarelController:
         -------
 
         """
-        pattern = "%(\S),(-?\d+.\d+)(\S+)#"
+        pattern = "%(\S),(-?\d+.?\d*)(\S+)#"
         match = re.match(pattern, message)
         if match:
             prefix = match.group(1)

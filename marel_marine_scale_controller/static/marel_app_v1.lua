@@ -76,7 +76,7 @@ end
 
 function run_prog_1(port, screen)
   print('Launching prog 1')
-  set_display('prog_1', screen)
+  set_app_display('prog_1', screen)
 
   while 1 do
     connection_status_display(screen)
@@ -108,7 +108,7 @@ end
 function run_prog_2(port, screen)
   print('Launching prog 2')
 
-  set_display('prog_2', screen)
+  set_app_display('prog_2', screen)
 
   while 1 do
     connection_status_display(screen)
@@ -127,33 +127,33 @@ end
 
 
 function run_main()
-  screen = 2
+  app_screen = 2
   output_port = 5
-  set_display('main', screen)
+  set_app_display('main', app_screen)
 
   while 1 do
-    display_weight(screen)
+    display_weight(app_screen)
 
-    connection_status_display(screen)
+    connection_status_display(app_screen)
 
     event, value = NextEvent(0)
 
-    if event ==  "softkey" and DispGetScr() == screen then
+    if event ==  "softkey" and DispGetScr() == app_screen then
       if value == 1 then
         print('Starting prog 1')
-        run_prog_1(output_port, screen)
+        run_prog_1(output_port, app_screen)
 
       elseif value == 2 then
         print('Starting prog 2')
-        run_prog_2(output_port, screen)
+        run_prog_2(output_port, app_screen)
 
       elseif value == 3 then
         print('Restarting Lua Interpreter')
-        set_display('reload', screen)
+        set_app_display('reload', app_screen)
         break
 
       end
-      set_display('main', screen)
+      set_app_display('main', app_screen)
     else
       keep_port_alive(output_port)
     end
