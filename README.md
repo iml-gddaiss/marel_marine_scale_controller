@@ -71,25 +71,25 @@ The Lua Application runs on the Marel Scale.
 On the scale, the Lua Application is displayed on the `2-Application` page. The page is accessible from the page menu (screen #2) or by cycling through the page (see section [Marel Marine Scale M220](#marel-marine-scale-m2200))
 
 <p align='center'>
-<img src='docs/images/marel_main_annotated.png' width='600' alt="Scale main display"/>
+<img src='docs/images/app_main.jpg' width='600' alt="Scale main display"/>
 </p>
 
-While program 1 is running, weight values are continuously sent (e.i. `%w,1.234kg#\n`, see section [Additional Information/Lua Script](#lua-script)).
-The Python Application stores the latest values and the GUI displays it.
-
-<p align='center'>
-<img src='docs/images/marel_prog_1.jpg' width='600' alt="Scale prog 1 display"/>
-</p>
-
+While program 1 is running, the weight value is continuously sent (e.i. `%w,1.234kg#\n`, see section [Additional Information/Lua Script](#lua-script)) and
+on the main page (`1-Scale`) a `Print` key will be  available. 
 Pressing the `Print` key sends a print message (e.i. `%p,1.234kg#\n`, see section [Additional Information/Lua Script](#lua-script)).
-When receiving a `Print` messages, the Python Application emulates a keyboard entry of that given values.
+
+<p align='center'>
+<img src='docs/images/app_prog_1.jpg' width='600' alt="Scale prog 1 display"/>
+</p>
 
 
 <p align='center'>
-<img src='docs/images/marel_sent.jpg' width='600' alt="Scale sent display"/>
+<img src='docs/images/scale_page.jpg' width='600' alt="Scale sent display"/>
 </p>
 
-When a print message is sent the screen will display this message: `>>>> SENT <<<<`
+The Python Application stores the latest values and the GUI displays it.
+When receiving a `Print` messages, the Python Application emulates a keyboard entry of that given value.
+When a print message is sent the `Print` key displays: `>>>>`.
 
 ## Python Application
 
