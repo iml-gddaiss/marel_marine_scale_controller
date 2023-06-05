@@ -32,22 +32,23 @@ function connection_status_display(screen)
 end
 
 
-function set_display(disp, screen)
+function set_app_display(disp, screen)
   DispClrScr(screen)
   if disp == "main" then
     DispStr(screen, 1, 1, "  Programs")
     DispStr(screen, 2, 1, "  --------")
     DispStr(screen, 3, 1, "    [Prog1]: Prints weight on key press.")
+    DispStr(screen, 6, 1, "    [Reboot]: Restart Lua interpreter.")
     DispStr(screen, 10, 1, "  Prog 1")
     DispStr(screen, 10, 21, "  Reboot")
     connection_status_display(screen)
   elseif disp == "prog_1" then
     DispStr(screen, 1, 1, "  -- Running program 1 --")
-    DispStr(screen, 2, 1, "    ```Prints weight on key press'''")
-    DispStr(screen, 3, 1, "    [Print]: Print weight")
-    DispStr(screen, 4, 1, "    [Stop]: Stop program 1")
-    DispStr(screen, 10, 1, "  Print")
-    DispStr(1, 10, 1, "  Print")
+    DispStr(screen, 2, 1, "- The weight value is continuously sent.")
+    DispStr(screen, 3, 1, "- Press the [Print] button, on the main")
+    DispStr(screen, 4, 1, "- page to send a print command.")
+    DispStr(screen, 5, 1, "- Press the [Stop] button to stop")
+    DispStr(screen, 6, 1, " the program.")
     DispStr(screen, 10, 11, "   Stop")
     connection_status_display(screen)
   elseif disp == "reload" then
@@ -57,33 +58,22 @@ function set_display(disp, screen)
 
 end
 
-function display_weight(screen)
-  weight, stability, zero, net = GetWeight()
-  weight, dev_range, dev_target, lower_lim, upper_lim = Pack(weight)
-  DispStr(screen, 6,12, "+-------------------------+")
-  DispStr(screen, 7,12, "| Weight:  ".. DoubleDigits(weight) .. "  |")
-  DispStr(screen, 8,12, "+-------------------------+")
-  --DispStr(screen, 7, 2, "Current Display " .. DispGetScr())
-end
-
-
 function run_prog_1(port, screen)
+  scale_screen = 1
   print('Launching prog 1')
-  set_display('prog_1', screen)
+  set_app_display('prog_1', screen)
+  DispStr(scale_screen, 10, 1, "  Print")
+  DispStr(scale_screen, 1, 1, "  [Running program 1]")
 
   while 1 do
     connection_status_display(screen)
-    display_weight(screen)
     event, value = NextEvent(0)
-    --if event == 'softkey' and DispGetScr() == screen then
-    -- [ use to only work if you were on the app screen ]
     if event == 'softkey' then
-      if value == 1 then
+      if value == 1 and DispGetScr() == scale_screen then
         send_weight(port, 'p')
-        DispStr(screen,9,1, "                >>>> SENT <<<<  ")
-        sleep(.5)
-        DispStr(screen,9,1, "                                        ")
-        --[this here is to prevent double press of the send button]
+        DispStr(scale_screen, 10, 1, "  >>>>>")
+        sleep(.5) --[this here is to prevent double press of the send button]
+        DispStr(scale_screen, 10, 1, "  Print")
         while NextEvent(0) == "softkey" do
             sleep(.01)
           end
@@ -101,29 +91,27 @@ end
 
 
 function run_main()
-  screen = 2
+  app_screen = 2
   output_port = 5
-  set_display('main', screen)
+  set_app_display('main', app_screen)
 
   while 1 do
-    display_weight(screen)
-
-    connection_status_display(screen)
+    connection_status_display(app_screen)
 
     event, value = NextEvent(0)
 
-    if event ==  "softkey" and DispGetScr() == screen then
+    if event ==  "softkey" and DispGetScr() == app_screen then
       if value == 1 then
         print('Starting prog 1')
-        run_prog_1(output_port, screen)
+        run_prog_1(output_port, app_screen)
 
       elseif value == 3 then
         print('Restarting Lua Interpreter')
-        set_display('reload', screen)
+        set_app_display('reload', app_screen)
         break
 
       end
-      set_display('main', screen)
+      set_app_display('main', app_screen)
     else
       keep_port_alive(output_port)
     end
